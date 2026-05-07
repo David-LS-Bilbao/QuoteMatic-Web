@@ -1,0 +1,35 @@
+.page-section {
+  width: min(100%, var(--layout-max-width));
+  margin: 0 auto;
+  padding: 72px 24px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-lead {
+  max-width: 680px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.text-cta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 28px;
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.text-cta:hover {
+  text-decoration: underline;
+}
