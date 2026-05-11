@@ -1,19 +1,27 @@
-import { Sparkles } from 'lucide-react'
+// Navbar component
+
+import { Compass, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router'
 
 const navItems = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/explore', label: 'Explorar' },
   { to: '/authors', label: 'Autores' },
-  { to: '/about', label: 'Sobre el proyecto' },
+  { to: '/about', label: 'Proyecto' },
 ]
 
+// barra de navegación principal 
 export function Navbar() {
   return (
     <header className="site-header">
       <NavLink to="/" className="brand" aria-label="QuoteMatic Web">
-        <Sparkles aria-hidden="true" size={22} />
-        <span>QuoteMatic Web</span>
+        <span className="brand-mark" aria-hidden="true">
+          <Sparkles size={20} />
+        </span>
+        <span className="brand-text">
+          <strong>QuoteMatic</strong>
+          <small>Cosmic quotes</small>
+        </span>
       </NavLink>
 
       <nav className="site-nav" aria-label="Navegacion principal">
@@ -30,6 +38,11 @@ export function Navbar() {
           </NavLink>
         ))}
       </nav>
+
+      <NavLink to="/explore" className="nav-cta">
+        <Compass aria-hidden="true" size={16} />
+        Explorar
+      </NavLink>
     </header>
   )
 }
