@@ -1,8 +1,17 @@
-
-import { ArrowRight, Code2, Compass, Heart, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import {
+  ArrowRight,
+  Code2,
+  Compass,
+  Heart,
+  RefreshCw,
+  Sparkles,
+} from 'lucide-react'
 import { Link } from 'react-router'
 
 import { Badge, QuoteCard } from '../components/ui'
+import { getRandomQuote } from '../services/quotesService'
+import type { Quote } from '../types/quote'
 
 const featureCards = [
   {
@@ -28,8 +37,55 @@ const featureCards = [
   },
 ]
 
-// Componente HomePage
 export function HomePage() {
+  const [quote, setQuote] = useState<Quote | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  async function loadRandomQuote() {
+    setIsLoading(true)
+    setErrorMessage(null)
+
+    try {
+      const response = await getRandomQuote()
+      setQuote(response.data)
+    } catch {
+      setErrorMessage(
+        'No hemos podido cargar una frase real ahora mismo. Inténtalo de nuevo.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let isMounted = true
+
+    getRandomQuote()
+      .then((response) => {
+        if (!isMounted) return
+
+        setQuote(response.data)
+        setErrorMessage(null)
+      })
+      .catch(() => {
+        if (!isMounted) return
+
+        setErrorMessage(
+          'No hemos podido cargar una frase real ahora mismo. Inténtalo de nuevo.',
+        )
+      })
+      .finally(() => {
+        if (!isMounted) return
+
+        setIsLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <section className="page-section home-page">
       <div className="home-hero">
@@ -56,8 +112,18 @@ export function HomePage() {
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
 
-            <a
+            <button
               className="ui-button ui-button-secondary ui-button-md"
+              type="button"
+              onClick={loadRandomQuote}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Cargando...' : 'Nueva frase'}
+              <RefreshCw aria-hidden="true" size={18} />
+            </button>
+
+            <a
+              className="ui-button ui-button-ghost ui-button-md"
               href="https://quotematic.davlos.es/api-docs/"
               target="_blank"
               rel="noreferrer"
@@ -68,13 +134,28 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="home-hero-card" aria-label="Frase destacada temporal">
-          <QuoteCard
-            quote="La inspiración existe, pero tiene que encontrarte trabajando."
-            author="Pablo Picasso"
-            meta="Demo visual — datos temporales hasta conectar la API real"
-            isMock
-          />
+        <div className="home-hero-card" aria-label="Frase destacada">
+          {isLoading ? (
+            <QuoteCard
+              quote="Buscando una frase en el universo QuoteMatic..."
+              meta="Conectando con la API real"
+              isMock
+            />
+          ) : errorMessage ? (
+            <QuoteCard quote={errorMessage} meta="Error controlado" isMock />
+          ) : quote ? (
+            <QuoteCard
+              quote={quote.text}
+              author={quote.authorText ?? 'QuoteMatic'}
+              meta="Frase real desde la API"
+            />
+          ) : (
+            <QuoteCard
+              quote="No hay frase disponible en este momento."
+              meta="Estado vacío"
+              isMock
+            />
+          )}
         </div>
       </div>
 
@@ -101,13 +182,13 @@ export function HomePage() {
       <aside className="tech-panel" aria-label="Resumen tecnico del proyecto">
         <div>
           <p className="eyebrow">Preparado para portfolio</p>
-          <h2>Una landing visual, pero honesta con el estado del proyecto.</h2>
+          <h2>Una landing visual conectada con datos reales.</h2>
         </div>
 
         <p>
-          Esta Home usa contenido temporal para validar el diseño. La conexión
-          con frases reales, favoritos, autenticación y CRUD privado se
-          implementará después en ramas separadas.
+          Esta Home ya consume una frase aleatoria desde la API REST de
+          QuoteMatic. Las siguientes ramas añadirán explorador público,
+          autenticación, favoritos y CRUD privado.
         </p>
       </aside>
     </section>
