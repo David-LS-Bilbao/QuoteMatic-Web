@@ -1,9 +1,13 @@
 import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
+  Bookmark,
+  ChevronDown,
   Filter,
   RefreshCw,
   Search,
+  Send,
+  Share2,
   SlidersHorizontal,
   Sparkles,
   X,
@@ -26,6 +30,8 @@ type ExploreFilters = {
 }
 
 type SavedExploreFilters = Partial<Omit<ExploreFilters, 'page'>>
+
+type ActiveFilterDrawer = 'situation' | 'quoteType' | null
 
 function getInitialFilters(): ExploreFilters {
   const fallback: ExploreFilters = {
@@ -101,6 +107,8 @@ export function ExplorePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [quotesError, setQuotesError] = useState<string | null>(null)
+  const [activeFilterDrawer, setActiveFilterDrawer] =
+  useState<ActiveFilterDrawer>(null)
 
   const mainQuote = quotes[0]
   const secondaryQuote = quotes[1]
@@ -109,6 +117,31 @@ export function ExplorePage() {
     () => Boolean(filters.search || filters.situation || filters.quoteType),
     [filters.search, filters.situation, filters.quoteType],
   )
+
+
+const selectedSituationLabel = useMemo(() => {
+  if (!filters.situation) {
+    return 'Todas las situaciones'
+  }
+
+  return (
+    situations.find((situation) => situation.slug === filters.situation)?.name ??
+    'Situación seleccionada'
+  )
+}, [filters.situation, situations])
+
+const selectedQuoteTypeLabel = useMemo(() => {
+  if (!filters.quoteType) {
+    return 'Todos los tipos'
+  }
+
+  return (
+    quoteTypes.find((quoteType) => quoteType.slug === filters.quoteType)?.name ??
+    'Tipo seleccionado'
+  )
+}, [filters.quoteType, quoteTypes])
+
+
 
   useEffect(() => {
     Promise.all([getSituations(), getQuoteTypes()])
@@ -187,23 +220,25 @@ export function ExplorePage() {
     }))
   }
 
-  function handleSituationChange(value: string) {
-    setIsLoading(true)
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      situation: value,
-      page: 1,
-    }))
-  }
+function handleSituationChange(value: string) {
+  setIsLoading(true)
+  setActiveFilterDrawer(null)
+  setFilters((currentFilters) => ({
+    ...currentFilters,
+    situation: value,
+    page: 1,
+  }))
+}
 
-  function handleQuoteTypeChange(value: string) {
-    setIsLoading(true)
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      quoteType: value,
-      page: 1,
-    }))
-  }
+function handleQuoteTypeChange(value: string) {
+  setIsLoading(true)
+  setActiveFilterDrawer(null)
+  setFilters((currentFilters) => ({
+    ...currentFilters,
+    quoteType: value,
+    page: 1,
+  }))
+}
 
   function handleGenerateMore() {
     setIsLoading(true)
@@ -219,16 +254,17 @@ export function ExplorePage() {
     setRefreshIndex((currentValue) => currentValue + 1)
   }
 
-  function handleClearFilters() {
-    setIsLoading(true)
-    setSearchInput('')
-    setFilters({
-      search: '',
-      situation: '',
-      quoteType: '',
-      page: 1,
-    })
-  }
+function handleClearFilters() {
+  setIsLoading(true)
+  setActiveFilterDrawer(null)
+  setSearchInput('')
+  setFilters({
+    search: '',
+    situation: '',
+    quoteType: '',
+    page: 1,
+  })
+}
 
   return (
     <section className="page-section explore-page">
@@ -261,37 +297,137 @@ export function ExplorePage() {
           />
         </label>
 
-        <label className="explore-select">
-          <Filter aria-hidden="true" size={18} />
-          <span className="sr-only">Filtrar por situación</span>
-          <select
-            value={filters.situation}
-            onChange={(event) => handleSituationChange(event.target.value)}
-          >
-            <option value="">Todas las situaciones</option>
-            {situations.map((situation) => (
-              <option key={situation._id} value={situation.slug}>
-                {situation.name}
-              </option>
-            ))}
-          </select>
-        </label>
+       <div className="explore-filter-control">
+  <button
+    className="filter-trigger"
+    type="button"
+    aria-expanded={activeFilterDrawer === 'situation'}
+    aria-controls="situation-filter-drawer"
+    onClick={() =>
+      setActiveFilterDrawer((currentDrawer) =>
+        currentDrawer === 'situation' ? null : 'situation',
+      )
+    }
+  >
+    <Filter aria-hidden="true" size={18} />
+    <span>{selectedSituationLabel}</span>
+    <ChevronDown aria-hidden="true" size={16} />
+  </button>
 
-        <label className="explore-select">
-          <SlidersHorizontal aria-hidden="true" size={18} />
-          <span className="sr-only">Filtrar por tipo de frase</span>
-          <select
-            value={filters.quoteType}
-            onChange={(event) => handleQuoteTypeChange(event.target.value)}
+  {activeFilterDrawer === 'situation' ? (
+    <div
+      className="filter-drawer"
+      id="situation-filter-drawer"
+      aria-label="Seleccionar situación"
+    >
+      <div className="filter-drawer-header">
+        <strong>Situación</strong>
+        <button
+          type="button"
+          aria-label="Cerrar selector de situación"
+          onClick={() => setActiveFilterDrawer(null)}
+        >
+          <X aria-hidden="true" size={16} />
+        </button>
+      </div>
+
+      <div className="filter-drawer-options">
+        <button
+          className={
+            filters.situation === ''
+              ? 'filter-option filter-option-active'
+              : 'filter-option'
+          }
+          type="button"
+          onClick={() => handleSituationChange('')}
+        >
+          Todas las situaciones
+        </button>
+
+        {situations.map((situation) => (
+          <button
+            className={
+              filters.situation === situation.slug
+                ? 'filter-option filter-option-active'
+                : 'filter-option'
+            }
+            key={situation._id}
+            type="button"
+            onClick={() => handleSituationChange(situation.slug)}
           >
-            <option value="">Todos los tipos</option>
-            {quoteTypes.map((quoteType) => (
-              <option key={quoteType._id} value={quoteType.slug}>
-                {quoteType.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            {situation.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  ) : null}
+</div>
+
+<div className="explore-filter-control">
+  <button
+    className="filter-trigger"
+    type="button"
+    aria-expanded={activeFilterDrawer === 'quoteType'}
+    aria-controls="quote-type-filter-drawer"
+    onClick={() =>
+      setActiveFilterDrawer((currentDrawer) =>
+        currentDrawer === 'quoteType' ? null : 'quoteType',
+      )
+    }
+  >
+    <SlidersHorizontal aria-hidden="true" size={18} />
+    <span>{selectedQuoteTypeLabel}</span>
+    <ChevronDown aria-hidden="true" size={16} />
+  </button>
+
+  {activeFilterDrawer === 'quoteType' ? (
+    <div
+      className="filter-drawer"
+      id="quote-type-filter-drawer"
+      aria-label="Seleccionar tipo de frase"
+    >
+      <div className="filter-drawer-header">
+        <strong>Tipo de frase</strong>
+        <button
+          type="button"
+          aria-label="Cerrar selector de tipo de frase"
+          onClick={() => setActiveFilterDrawer(null)}
+        >
+          <X aria-hidden="true" size={16} />
+        </button>
+      </div>
+
+      <div className="filter-drawer-options">
+        <button
+          className={
+            filters.quoteType === ''
+              ? 'filter-option filter-option-active'
+              : 'filter-option'
+          }
+          type="button"
+          onClick={() => handleQuoteTypeChange('')}
+        >
+          Todos los tipos
+        </button>
+
+        {quoteTypes.map((quoteType) => (
+          <button
+            className={
+              filters.quoteType === quoteType.slug
+                ? 'filter-option filter-option-active'
+                : 'filter-option'
+            }
+            key={quoteType._id}
+            type="button"
+            onClick={() => handleQuoteTypeChange(quoteType.slug)}
+          >
+            {quoteType.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  ) : null}
+</div>
 
         <button className="ui-button ui-button-primary ui-button-md" type="submit">
           Buscar
@@ -393,23 +529,81 @@ export function ExplorePage() {
             </aside>
           ) : null}
 
-          <div className="explore-actions">
-            <button
-              className="ui-button ui-button-primary ui-button-md"
-              type="button"
-              onClick={handleGenerateMore}
-              disabled={isLoading}
-            >
-              <RefreshCw aria-hidden="true" size={18} />
-              Otra frase
-            </button>
+          
+  
 
             {totalPages > 1 ? (
               <span>
                 Selección {filters.page} de {totalPages}
               </span>
             ) : null}
-          </div>
+
+<div className="explore-actions" aria-label="Acciones de la frase recomendada">
+  <div className="explore-actions-primary">
+    <button
+      className="ui-button ui-button-primary ui-button-md"
+      type="button"
+      onClick={handleGenerateMore}
+      disabled={isLoading}
+    >
+      <RefreshCw aria-hidden="true" size={18} />
+      Otra frase
+    </button>
+
+    {totalPages > 1 ? (
+      <span className="explore-selection">
+        Selección {filters.page} de {totalPages}
+      </span>
+    ) : null}
+  </div>
+
+  <div className="explore-actions-secondary" aria-label="Acciones futuras">
+    <button
+      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+      type="button"
+      disabled
+      title="Función de compartir preparada para una próxima versión"
+      aria-label="Compartir frase próximamente"
+    >
+      <Share2 aria-hidden="true" size={18} />
+      Compartir
+      <span className="action-pill">Pronto</span>
+    </button>
+
+    <button
+      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+      type="button"
+      disabled
+      title="Guardar favoritos estará disponible con autenticación"
+      aria-label="Guardar frase próximamente"
+    >
+      <Bookmark aria-hidden="true" size={18} />
+      Guardar
+      <span className="action-pill">Pronto</span>
+    </button>
+
+    <button
+      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+      type="button"
+      disabled
+      title="Enviar frase estará disponible en una próxima versión"
+      aria-label="Enviar frase próximamente"
+    >
+      <Send aria-hidden="true" size={18} />
+      Enviar
+      <span className="action-pill">Pronto</span>
+    </button>
+  </div>
+</div>
+         
+  <div className="explore-actions-primary">
+ 
+    {totalPages > 1 ? (
+      <span className="explore-selection">
+        Selección {filters.page} de {totalPages}
+      </span>
+    ) : null}
+  </div>
         </div>
       ) : null}
     </section>
