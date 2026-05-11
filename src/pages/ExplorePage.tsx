@@ -2,7 +2,6 @@ import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Bookmark,
-  ChevronDown,
   Filter,
   RefreshCw,
   Search,
@@ -13,7 +12,7 @@ import {
   X,
 } from 'lucide-react'
 
-import { Badge, EmptyState, QuoteCard } from '../components/ui'
+import { Badge, EmptyState, FilterControl, QuoteCard } from '../components/ui'
 import { getQuoteTypes, getSituations } from '../services/catalogService'
 import { getQuotes } from '../services/quotesService'
 import type { Quote } from '../types/quote'
@@ -108,7 +107,7 @@ export function ExplorePage() {
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [quotesError, setQuotesError] = useState<string | null>(null)
   const [activeFilterDrawer, setActiveFilterDrawer] =
-  useState<ActiveFilterDrawer>(null)
+    useState<ActiveFilterDrawer>(null)
 
   const mainQuote = quotes[0]
   const secondaryQuote = quotes[1]
@@ -118,30 +117,27 @@ export function ExplorePage() {
     [filters.search, filters.situation, filters.quoteType],
   )
 
+  const selectedSituationLabel = useMemo(() => {
+    if (!filters.situation) {
+      return 'Todas las situaciones'
+    }
 
-const selectedSituationLabel = useMemo(() => {
-  if (!filters.situation) {
-    return 'Todas las situaciones'
-  }
+    return (
+      situations.find((situation) => situation.slug === filters.situation)?.name ??
+      'Situación seleccionada'
+    )
+  }, [filters.situation, situations])
 
-  return (
-    situations.find((situation) => situation.slug === filters.situation)?.name ??
-    'Situación seleccionada'
-  )
-}, [filters.situation, situations])
+  const selectedQuoteTypeLabel = useMemo(() => {
+    if (!filters.quoteType) {
+      return 'Todos los tipos'
+    }
 
-const selectedQuoteTypeLabel = useMemo(() => {
-  if (!filters.quoteType) {
-    return 'Todos los tipos'
-  }
-
-  return (
-    quoteTypes.find((quoteType) => quoteType.slug === filters.quoteType)?.name ??
-    'Tipo seleccionado'
-  )
-}, [filters.quoteType, quoteTypes])
-
-
+    return (
+      quoteTypes.find((quoteType) => quoteType.slug === filters.quoteType)?.name ??
+      'Tipo seleccionado'
+    )
+  }, [filters.quoteType, quoteTypes])
 
   useEffect(() => {
     Promise.all([getSituations(), getQuoteTypes()])
@@ -220,25 +216,25 @@ const selectedQuoteTypeLabel = useMemo(() => {
     }))
   }
 
-function handleSituationChange(value: string) {
-  setIsLoading(true)
-  setActiveFilterDrawer(null)
-  setFilters((currentFilters) => ({
-    ...currentFilters,
-    situation: value,
-    page: 1,
-  }))
-}
+  function handleSituationChange(value: string) {
+    setIsLoading(true)
+    setActiveFilterDrawer(null)
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      situation: value,
+      page: 1,
+    }))
+  }
 
-function handleQuoteTypeChange(value: string) {
-  setIsLoading(true)
-  setActiveFilterDrawer(null)
-  setFilters((currentFilters) => ({
-    ...currentFilters,
-    quoteType: value,
-    page: 1,
-  }))
-}
+  function handleQuoteTypeChange(value: string) {
+    setIsLoading(true)
+    setActiveFilterDrawer(null)
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      quoteType: value,
+      page: 1,
+    }))
+  }
 
   function handleGenerateMore() {
     setIsLoading(true)
@@ -254,17 +250,17 @@ function handleQuoteTypeChange(value: string) {
     setRefreshIndex((currentValue) => currentValue + 1)
   }
 
-function handleClearFilters() {
-  setIsLoading(true)
-  setActiveFilterDrawer(null)
-  setSearchInput('')
-  setFilters({
-    search: '',
-    situation: '',
-    quoteType: '',
-    page: 1,
-  })
-}
+  function handleClearFilters() {
+    setIsLoading(true)
+    setActiveFilterDrawer(null)
+    setSearchInput('')
+    setFilters({
+      search: '',
+      situation: '',
+      quoteType: '',
+      page: 1,
+    })
+  }
 
   return (
     <section className="page-section explore-page">
@@ -529,81 +525,63 @@ function handleClearFilters() {
             </aside>
           ) : null}
 
-          
-  
+          <div className="explore-actions" aria-label="Acciones de la frase recomendada">
+            <div className="explore-actions-primary">
+              <button
+                className="ui-button ui-button-primary ui-button-md"
+                type="button"
+                onClick={handleGenerateMore}
+                disabled={isLoading}
+              >
+                <RefreshCw aria-hidden="true" size={18} />
+                Otra frase
+              </button>
 
-            {totalPages > 1 ? (
-              <span>
-                Selección {filters.page} de {totalPages}
-              </span>
-            ) : null}
+              {totalPages > 1 ? (
+                <span className="explore-selection">
+                  Selección {filters.page} de {totalPages}
+                </span>
+              ) : null}
+            </div>
 
-<div className="explore-actions" aria-label="Acciones de la frase recomendada">
-  <div className="explore-actions-primary">
-    <button
-      className="ui-button ui-button-primary ui-button-md"
-      type="button"
-      onClick={handleGenerateMore}
-      disabled={isLoading}
-    >
-      <RefreshCw aria-hidden="true" size={18} />
-      Otra frase
-    </button>
+            <div className="explore-actions-secondary" aria-label="Acciones futuras">
+              <button
+                className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+                type="button"
+                disabled
+                title="Función de compartir preparada para una próxima versión"
+                aria-label="Compartir frase próximamente"
+              >
+                <Share2 aria-hidden="true" size={18} />
+                Compartir
+                <span className="action-pill">Pronto</span>
+              </button>
 
-    {totalPages > 1 ? (
-      <span className="explore-selection">
-        Selección {filters.page} de {totalPages}
-      </span>
-    ) : null}
-  </div>
+              <button
+                className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+                type="button"
+                disabled
+                title="Guardar favoritos estará disponible con autenticación"
+                aria-label="Guardar frase próximamente"
+              >
+                <Bookmark aria-hidden="true" size={18} />
+                Guardar
+                <span className="action-pill">Pronto</span>
+              </button>
 
-  <div className="explore-actions-secondary" aria-label="Acciones futuras">
-    <button
-      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
-      type="button"
-      disabled
-      title="Función de compartir preparada para una próxima versión"
-      aria-label="Compartir frase próximamente"
-    >
-      <Share2 aria-hidden="true" size={18} />
-      Compartir
-      <span className="action-pill">Pronto</span>
-    </button>
-
-    <button
-      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
-      type="button"
-      disabled
-      title="Guardar favoritos estará disponible con autenticación"
-      aria-label="Guardar frase próximamente"
-    >
-      <Bookmark aria-hidden="true" size={18} />
-      Guardar
-      <span className="action-pill">Pronto</span>
-    </button>
-
-    <button
-      className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
-      type="button"
-      disabled
-      title="Enviar frase estará disponible en una próxima versión"
-      aria-label="Enviar frase próximamente"
-    >
-      <Send aria-hidden="true" size={18} />
-      Enviar
-      <span className="action-pill">Pronto</span>
-    </button>
-  </div>
-</div>
-         
-  <div className="explore-actions-primary">
- 
-    {totalPages > 1 ? (
-      <span className="explore-selection">
-        Selección {filters.page} de {totalPages}
-      </span>
-    ) : null}
-  </div>
+              <button
+                className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+                type="button"
+                disabled
+                title="Enviar frase estará disponible en una próxima versión"
+                aria-label="Enviar frase próximamente"
+              >
+                <Send aria-hidden="true" size={18} />
+                Enviar
+                <span className="action-pill">Pronto</span>
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </section>
