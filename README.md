@@ -1,106 +1,127 @@
 # QuoteMatic Web
 
-Frontend React independiente para consumir la API publica de QuoteMatic.
+Frontend React independiente para consumir la API REST pública de QuoteMatic.
 
 ## Resumen
 
-QuoteMatic Web es el cliente frontend moderno del proyecto QuoteMatic. La aplicacion se plantea como una SPA visual, responsive y orientada a portfolio, construida sobre React, Vite y TypeScript.
+QuoteMatic Web es el cliente frontend moderno del proyecto QuoteMatic. La aplicación está construida como una SPA visual, responsive y orientada a portfolio usando React, Vite y TypeScript.
 
-El backend ya existe y se mantiene como fuente unica de verdad. Este repositorio no rehace la API ni accede directamente a la base de datos: consume los endpoints publicos del backend desplegado.
-
-## Estado actual
-
-Proyecto en fase de bootstrap.
-
-- Vite + React + TypeScript ya inicializado.
-- ESLint configurado.
-- `.env.example` creado con la URL base de la API.
-- README corregido a partir de `docs/informe-previo.md`.
-- La pantalla actual sigue siendo el scaffold inicial de Vite y esta pendiente de sustituirse por la interfaz QuoteMatic.
+El backend ya existe y se mantiene como fuente única de verdad. Este repositorio no rehace la API ni accede directamente a la base de datos: consume endpoints REST del backend desplegado.
 
 ## Enlaces
 
 - Backend/API: <https://quotematic.davlos.es>
 - Swagger: <https://quotematic.davlos.es/api-docs/>
-- Informe previo: [`docs/informe-previo.md`](docs/informe-previo.md)
 - Repositorio frontend: `git@github.com:David-LS-Bilbao/QuoteMatic-Web.git`
+- Repositorio backend: <https://github.com/David-LS-Bilbao/QuoteMatic>
+
+## Estado actual
+
+Proyecto en fase MVP React.
+
+Ya implementado:
+
+- Vite + React + TypeScript.
+- React Router.
+- ESLint.
+- `.env.example` con URL base de API.
+- Design System visual Cosmos.
+- Layout principal.
+- Navbar y Footer responsive con estilo glass.
+- Componentes UI reutilizables:
+  - `Button`
+  - `Badge`
+  - `QuoteCard`
+  - `EmptyState`
+- Home visual conectada a la API real.
+- Carga de frase aleatoria pública desde `GET /api/quotes/random`.
+- Estados de carga, error y éxito en Home.
+- Cliente API base con `fetch`.
+- Tipos TypeScript base para respuestas API y frases.
+- Documentación técnica en `docs/`.
+
+Pendiente:
+
+- Explorador público de frases.
+- Filtros por situación y tipo de frase.
+- Búsqueda de frases.
+- Paginación.
+- Auth: login, registro, logout y sesión.
+- Favoritos.
+- Mis frases privadas.
+- Crear, editar y borrar frases privadas.
+- Compartir frase con Web Share API o copiar al portapapeles.
+- Deploy del frontend.
 
 ## Stack actual
 
-- React 19
+- React
 - Vite
 - TypeScript
-- ESLint
-- CSS
-- Fetch API para futuras llamadas HTTP
+- React Router
+- lucide-react
+- CSS normal
+- Fetch API
+- API REST externa
+- Cookies de sesión en backend
 
-## Objetivo del MVP
+## Scripts disponibles
 
-El MVP debe entregar una aplicacion publica, estable y responsive con:
-
-- Landing page moderna.
-- Explorador de frases.
-- Frase aleatoria desde API.
-- Filtros por situacion y tipo de frase.
-- Listado de autores.
-- Estados de carga, error y vacio.
-- Diseno mobile-first.
-- Documentacion clara para instalacion, evaluacion y despliegue.
-
-## Fuera del MVP inicial
-
-- Login.
-- Favoritos.
-- Panel de administracion en React.
-- CRUD privado.
-- JWT.
-- Redux o Zustand.
-
-Estas funcionalidades se dejan para una fase posterior porque el backend usa sesiones y cookies. En un frontend desplegado en otro dominio esto puede requerir ajustes de CORS, `credentials` y configuracion de cookies.
-
-## Instalacion
+Instalar dependencias:
 
 ```bash
 npm install
 ```
 
-## Variables de entorno
-
-Crear un archivo `.env` en la raiz del proyecto tomando como referencia `.env.example`:
-
-```env
-VITE_API_BASE_URL=https://quotematic.davlos.es
-```
-
-## Scripts disponibles
+Arrancar entorno local:
 
 ```bash
 npm run dev
 ```
 
-Arranca el servidor de desarrollo de Vite.
+Compilar build de producción:
 
 ```bash
 npm run build
 ```
 
-Compila TypeScript y genera la build de produccion en `dist`.
-
-```bash
-npm run preview
-```
-
-Sirve localmente la build generada.
+Ejecutar lint:
 
 ```bash
 npm run lint
 ```
 
-Ejecuta ESLint sobre el proyecto.
+Previsualizar build:
 
-## Endpoints publicos previstos
+```bash
+npm run preview
+```
 
-```text
+## Variables de entorno
+
+Crear un archivo `.env` en la raíz tomando como referencia `.env.example`:
+
+```env
+VITE_API_BASE_URL=https://quotematic.davlos.es
+```
+
+## API
+
+Base URL:
+
+```txt
+https://quotematic.davlos.es
+```
+
+Swagger:
+
+```txt
+https://quotematic.davlos.es/api-docs/
+```
+
+Endpoints públicos previstos/activos para el MVP React:
+
+```txt
 GET /api/quotes/random
 GET /api/quotes
 GET /api/authors
@@ -108,98 +129,200 @@ GET /api/situations
 GET /api/quote-types
 ```
 
-Base URL:
+Endpoints autenticados previstos:
 
-```text
-https://quotematic.davlos.es
+```txt
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
+POST   /api/auth/logout
+
+GET    /api/favorites/me
+POST   /api/favorites/:quoteId
+DELETE /api/favorites/:quoteId
+
+GET    /api/me/quotes
+POST   /api/me/quotes
+GET    /api/me/quotes/random
+GET    /api/me/quotes/:id
+PUT    /api/me/quotes/:id
+DELETE /api/me/quotes/:id
 ```
 
-Antes de fijar los tipos TypeScript definitivos, se debe validar el JSON real de cada endpoint en Swagger.
+El backend usa cookies de sesión, no JWT. Las peticiones autenticadas desde React deben usar:
 
-## Rutas previstas
+```ts
+credentials: 'include'
+```
 
-| Ruta | Pantalla | API principal |
-| ---- | -------- | ------------- |
-| `/` | Home | Situaciones opcional |
-| `/explore` | Explorador de frases | `situations`, `quote-types`, `quotes/random` |
-| `/authors` | Listado de autores | `authors` |
-| `/authors/:id` | Detalle de autor | `authors`, `quotes` si el contrato lo permite |
-| `/about` | Informacion tecnica | No requiere API |
-| `*` | 404 | No requiere API |
+## Rutas actuales
 
-## Arquitectura objetivo
+| Ruta | Estado | Descripción |
+| ---- | ------ | ----------- |
+| `/` | Implementada | Home visual conectada a frase aleatoria real |
+| `/explore` | Placeholder visual | Futuro explorador público de frases |
+| `/authors` | Placeholder visual | Futuro listado de autores |
+| `/about` | Implementada visualmente | Información técnica del proyecto |
+| `*` | Implementada | Página 404 |
 
-```text
+## Arquitectura actual
+
+```txt
 QuoteMatic-Web/
-├── public/
-│   ├── favicon.svg
-│   └── icons.svg
 ├── docs/
-│   └── informe-previo.md
+│   ├── memoria-feat-ui-design-system.md
+│   └── memoria-feat-home-random-quote.md
+├── public/
 ├── src/
 │   ├── app/
-│   ├── pages/
+│   │   ├── App.tsx
+│   │   └── router.tsx
 │   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AppLayout.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── Navbar.tsx
+│   │   └── ui/
+│   │       ├── Badge.tsx
+│   │       ├── Button.tsx
+│   │       ├── EmptyState.tsx
+│   │       ├── QuoteCard.tsx
+│   │       └── index.ts
+│   ├── pages/
+│   │   ├── AboutPage.tsx
+│   │   ├── AuthorsPage.tsx
+│   │   ├── ExplorePage.tsx
+│   │   ├── HomePage.tsx
+│   │   └── NotFoundPage.tsx
 │   ├── services/
-│   ├── types/
+│   │   ├── apiClient.ts
+│   │   └── quotesService.ts
 │   ├── styles/
-│   ├── assets/
+│   │   ├── components.css
+│   │   ├── global.css
+│   │   ├── utilities.css
+│   │   └── variables.css
+│   ├── types/
+│   │   ├── api.ts
+│   │   └── quote.ts
 │   └── main.tsx
 ├── .env.example
 ├── README.md
 └── package.json
 ```
 
-## Capas recomendadas
+## Capas principales
 
 | Capa | Responsabilidad |
 | ---- | --------------- |
-| `app` | Montaje de la aplicacion y rutas. |
-| `pages` | Composicion de pantallas. |
-| `components` | UI reutilizable: layout, cards, filtros y estados. |
-| `services` | Cliente HTTP y servicios por dominio. |
-| `types` | Contratos TypeScript de API. |
-| `styles` | Variables, estilos globales y utilidades responsive. |
+| `app` | Montaje de la aplicación y rutas |
+| `pages` | Composición de pantallas |
+| `components/layout` | Layout general, navegación y footer |
+| `components/ui` | Componentes visuales reutilizables |
+| `services` | Cliente HTTP y servicios por dominio |
+| `types` | Tipos TypeScript de API y dominio |
+| `styles` | Variables, estilos globales, utilidades y componentes |
+
+## Design System Cosmos
+
+La interfaz usa una dirección visual llamada **Cosmos**:
+
+- Tema oscuro.
+- Fondos con gradientes radiales.
+- Glassmorphism en navbar, footer, cards y paneles.
+- Sombras suaves.
+- Efectos 3D ligeros en cards.
+- Responsive mobile-first.
+- Soporte para `prefers-reduced-motion`.
+- Compatibilidad visual con Safari/Mac mediante `-webkit-backdrop-filter`.
+
+## Estado del MVP respecto a requisitos del bootcamp
+
+| Requisito | Estado |
+| --------- | ------ |
+| Consumo de API | Implementado en Home con `/api/quotes/random` |
+| `useState` | Implementado en Home |
+| `useEffect` | Implementado en Home |
+| `localStorage` | Pendiente |
+| Mínimo 5 componentes | Cumplido |
+| Responsive | Base visual implementada |
+| TypeScript | Implementado |
+| Documentación | En progreso |
 
 ## Plan de sprints
 
-| Sprint | Rama sugerida | Objetivo |
-| ------ | ------------- | -------- |
-| 0 | `feat/project-bootstrap` | Bootstrap Vite, TypeScript, estructura base y README. |
-| 1 | `feat/landing-layout` | Layout, navegacion, home, about, footer y 404. |
-| 2 | `feat/api-catalogs` | Cliente API, tipos y catalogos publicos. |
-| 3 | `feat/explore-random-quote` | Filtros, frase aleatoria y QuoteCard. |
-| 4 | `feat/authors-pages` | Listado y detalle de autores. |
-| 5 | `feat/ui-polish-responsive` | Responsive, accesibilidad y acabado visual. |
-| 6 | `chore/deploy-config` | Deploy en Vercel o Netlify. |
+| Sprint | Rama | Estado | Objetivo |
+| ------ | ---- | ------ | -------- |
+| 0 | `feat/project-bootstrap` | Completado | Bootstrap Vite + React + TS |
+| 1 | `feat/ui-design-system` | Completado | Sistema visual Cosmos |
+| 2 | `feat/home-random-quote` | Completado | Home conectada a API real |
+| 3 | `feat/explore-quotes` | Pendiente | Explorador público con filtros |
+| 4 | `feat/auth-session` | Pendiente | Login, registro, logout y sesión |
+| 5 | `feat/favorites` | Pendiente | Favoritos de usuario |
+| 6 | `feat/my-private-quotes` | Pendiente | CRUD privado de frases |
+| 7 | `feat/share-quote` | Pendiente | Compartir/copiar frase |
+| 8 | `chore/docs-and-demo-polish` | Pendiente | README, capturas y preparación demo |
 
-## Riesgos tecnicos
+## QA recomendado
 
-- Confirmar en Swagger el formato real de las respuestas.
-- Validar CORS desde local y desde el futuro deploy.
-- No bloquear el MVP con login o favoritos.
-- Comprobar query params reales para `GET /api/quotes/random`.
-- Mantener el estado simple con hooks hasta que exista una necesidad real de estado global.
+Antes de cada PR:
 
-## Checklist MVP
+```bash
+npm run lint
+npm run build
+npm run dev
+```
 
-- [x] Inicializar Vite React TypeScript.
-- [x] Crear `.env.example`.
-- [x] Documentar el informe previo.
-- [x] Corregir README inicial.
-- [ ] Sustituir scaffold de Vite por layout QuoteMatic.
-- [ ] Validar Swagger y respuestas reales de API.
-- [ ] Crear estructura `app`, `pages`, `components`, `services`, `types` y `styles`.
-- [ ] Configurar rutas publicas.
-- [ ] Implementar cliente API.
-- [ ] Cargar situaciones, tipos de frase y autores.
-- [ ] Implementar explorador de frases.
-- [ ] Implementar pagina de autores.
-- [ ] Revisar responsive en movil, tablet y desktop.
-- [ ] Ejecutar `npm run lint`.
-- [ ] Ejecutar `npm run build`.
-- [ ] Desplegar demo publica.
+Revisión manual:
+
+```txt
+/
+ /explore
+ /authors
+ /about
+ /ruta-inexistente
+```
+
+Checklist visual:
+
+```txt
+- Sin errores en consola.
+- Sin scroll horizontal.
+- Navbar usable en móvil.
+- Footer correcto en móvil y desktop.
+- Home carga una frase real.
+- Botón "Nueva frase" funciona.
+- Estados de carga/error no rompen la UI.
+```
+
+## Git workflow
+
+Ramas principales:
+
+```txt
+main = estable
+dev = integración
+feat/* = features
+docs/* = documentación
+chore/* = mantenimiento
+```
+
+Flujo recomendado:
+
+```bash
+git checkout dev
+git pull origin dev
+git checkout -b feat/nombre-feature
+```
+
+Antes de PR:
+
+```bash
+npm run lint
+npm run build
+git status
+```
 
 ## Autor
 
-David Lopez Sotelo
+David López Sotelo
