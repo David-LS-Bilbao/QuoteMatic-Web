@@ -1,8 +1,24 @@
+export type ContentRating = 'all' | 'teen' | 'adult'
+
+export type QuoteAuthor = {
+  _id?: string
+  name?: string
+}
+
+export type QuoteCategory = {
+  _id?: string
+  name?: string
+  slug?: string
+}
+
 export type Quote = {
   _id: string
   text: string
   authorText?: string
-  contentRating?: 'all' | 'teen' | 'adult'
+  author?: QuoteAuthor | string
+  situation?: QuoteCategory | string
+  quoteType?: QuoteCategory | string
+  contentRating?: ContentRating
   language?: string
   sourceType?: string
   sourceReference?: string
@@ -11,7 +27,7 @@ export type Quote = {
 export type QuoteFilters = {
   situation?: string
   quoteType?: string
-  contentRating?: 'all' | 'teen' | 'adult'
+  contentRating?: ContentRating
   author?: string
   search?: string
   page?: number
