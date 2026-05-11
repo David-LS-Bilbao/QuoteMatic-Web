@@ -1,10 +1,11 @@
+import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ChevronLeft,
-  ChevronRight,
   Filter,
+  RefreshCw,
   Search,
   SlidersHorizontal,
+  Sparkles,
   X,
 } from 'lucide-react'
 
@@ -15,7 +16,7 @@ import type { Quote } from '../types/quote'
 import type { QuoteType, Situation } from '../types/catalog'
 
 const STORAGE_KEY = 'quotematic:explore-filters'
-const PAGE_SIZE = 8
+const PAGE_SIZE = 2
 
 type ExploreFilters = {
   search: string
@@ -24,7 +25,7 @@ type ExploreFilters = {
   page: number
 }
 
-type SavedExploreFilters = Partial<ExploreFilters>
+type SavedExploreFilters = Partial<Omit<ExploreFilters, 'page'>>
 
 function getInitialFilters(): ExploreFilters {
   const fallback: ExploreFilters = {
@@ -47,7 +48,7 @@ function getInitialFilters(): ExploreFilters {
       search: saved.search ?? '',
       situation: saved.situation ?? '',
       quoteType: saved.quoteType ?? '',
-      page: saved.page ?? 1,
+      page: 1,
     }
   } catch {
     return fallback
@@ -82,6 +83,12 @@ function getCategoryName(value: Quote['situation'] | Quote['quoteType']) {
   return value.name ?? value.slug
 }
 
+function buildQuoteMeta(quote: Quote) {
+  return [getCategoryName(quote.situation), getCategoryName(quote.quoteType)]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 export function ExplorePage() {
   const [filters, setFilters] = useState<ExploreFilters>(getInitialFilters)
   const [searchInput, setSearchInput] = useState(filters.search)
@@ -90,9 +97,13 @@ export function ExplorePage() {
   const [quoteTypes, setQuoteTypes] = useState<QuoteType[]>([])
   const [totalPages, setTotalPages] = useState(1)
   const [totalQuotes, setTotalQuotes] = useState(0)
+  const [refreshIndex, setRefreshIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [quotesError, setQuotesError] = useState<string | null>(null)
+
+  const mainQuote = quotes[0]
+  const secondaryQuote = quotes[1]
 
   const hasActiveFilters = useMemo(
     () => Boolean(filters.search || filters.situation || filters.quoteType),
@@ -101,12 +112,14 @@ export function ExplorePage() {
 
   useEffect(() => {
     Promise.all([getSituations(), getQuoteTypes()])
-      .then(([situationsResponse, quoteTypesResponse]) => {
-        setSituations(situationsResponse.data)
-        setQuoteTypes(quoteTypesResponse.data)
+      .then(([situationsData, quoteTypesData]) => {
+        setSituations(situationsData)
+        setQuoteTypes(quoteTypesData)
         setCatalogError(null)
       })
       .catch(() => {
+        setSituations([])
+        setQuoteTypes([])
         setCatalogError(
           'No hemos podido cargar los filtros. Puedes seguir explorando frases.',
         )
@@ -120,10 +133,9 @@ export function ExplorePage() {
         search: filters.search,
         situation: filters.situation,
         quoteType: filters.quoteType,
-        page: filters.page,
       }),
     )
-  }, [filters])
+  }, [filters.search, filters.situation, filters.quoteType])
 
   useEffect(() => {
     let isMounted = true
@@ -150,7 +162,7 @@ export function ExplorePage() {
         setTotalPages(1)
         setTotalQuotes(0)
         setQuotesError(
-          'No hemos podido cargar las frases. Revisa la conexión o prueba otros filtros.',
+          'No hemos podido cargar frases. Revisa la conexión o prueba otros filtros.',
         )
       })
       .finally(() => {
@@ -162,7 +174,7 @@ export function ExplorePage() {
     return () => {
       isMounted = false
     }
-  }, [filters])
+  }, [filters, refreshIndex])
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -193,12 +205,18 @@ export function ExplorePage() {
     }))
   }
 
-  function handlePageChange(page: number) {
+  function handleGenerateMore() {
     setIsLoading(true)
+
     setFilters((currentFilters) => ({
       ...currentFilters,
-      page,
+      page:
+        currentFilters.page >= totalPages || totalPages <= 1
+          ? 1
+          : currentFilters.page + 1,
     }))
+
+    setRefreshIndex((currentValue) => currentValue + 1)
   }
 
   function handleClearFilters() {
@@ -221,12 +239,13 @@ export function ExplorePage() {
           <Badge variant="muted">localStorage</Badge>
         </div>
 
-        <p className="eyebrow">MVP público</p>
-        <h1>Explorar frases</h1>
+        <p className="eyebrow">Generador público</p>
+        <h1>Encuentra una frase para este momento.</h1>
 
         <p className="page-lead">
-          Busca y filtra frases públicas por texto, situación y tipo. Tus
-          filtros quedan recordados en el navegador para la próxima sesión.
+          Filtra por texto, situación o tipo de frase. QuoteMatic te muestra una
+          recomendación principal y una alternativa para seguir explorando sin
+          ruido visual.
         </p>
       </div>
 
@@ -298,10 +317,10 @@ export function ExplorePage() {
 
       <div className="explore-summary" aria-live="polite">
         {isLoading ? (
-          <span>Cargando frases...</span>
+          <span>Buscando una frase...</span>
         ) : (
           <span>
-            {totalQuotes} {totalQuotes === 1 ? 'frase encontrada' : 'frases encontradas'}
+            {totalQuotes} {totalQuotes === 1 ? 'frase disponible' : 'frases disponibles'}
           </span>
         )}
 
@@ -313,7 +332,7 @@ export function ExplorePage() {
           <button
             className="ui-button ui-button-secondary ui-button-md"
             type="button"
-            onClick={() => handlePageChange(filters.page)}
+            onClick={handleGenerateMore}
           >
             Reintentar
           </button>
@@ -321,15 +340,14 @@ export function ExplorePage() {
       ) : null}
 
       {!quotesError && isLoading ? (
-        <div className="quotes-grid" aria-label="Frases cargando">
-          {Array.from({ length: 4 }).map((_, index) => (
+        <div className="explore-result" aria-label="Frase cargando">
+          <div className="explore-main-card">
             <QuoteCard
-              key={index}
-              quote="Cargando una frase desde QuoteMatic..."
+              quote="Buscando una frase en el universo QuoteMatic..."
               meta="Conectando con la API"
               isMock
             />
-          ))}
+          </div>
         </div>
       ) : null}
 
@@ -348,50 +366,51 @@ export function ExplorePage() {
         </EmptyState>
       ) : null}
 
-      {!quotesError && !isLoading && quotes.length > 0 ? (
-        <>
-          <div className="quotes-grid" aria-label="Listado de frases">
-            {quotes.map((quote) => {
-              const situationName = getCategoryName(quote.situation)
-              const quoteTypeName = getCategoryName(quote.quoteType)
+      {!quotesError && !isLoading && mainQuote ? (
+        <div className="explore-result" aria-label="Frase recomendada">
+          <div className="explore-main-card">
+            <div className="explore-result-label">
+              <Sparkles aria-hidden="true" size={18} />
+              Recomendación principal
+            </div>
 
-              return (
-                <QuoteCard
-                  key={quote._id}
-                  quote={quote.text}
-                  author={getAuthorName(quote)}
-                  meta={[situationName, quoteTypeName].filter(Boolean).join(' · ')}
-                />
-              )
-            })}
+            <QuoteCard
+              quote={mainQuote.text}
+              author={getAuthorName(mainQuote)}
+              meta={buildQuoteMeta(mainQuote) || 'Frase pública'}
+            />
           </div>
 
-          <div className="explore-pagination" aria-label="Paginación">
+          {secondaryQuote ? (
+            <aside className="explore-secondary-card">
+              <p className="explore-secondary-title">También puedes probar</p>
+
+              <QuoteCard
+                quote={secondaryQuote.text}
+                author={getAuthorName(secondaryQuote)}
+                meta={buildQuoteMeta(secondaryQuote) || 'Alternativa'}
+              />
+            </aside>
+          ) : null}
+
+          <div className="explore-actions">
             <button
-              className="ui-button ui-button-secondary ui-button-sm"
+              className="ui-button ui-button-primary ui-button-md"
               type="button"
-              disabled={filters.page <= 1}
-              onClick={() => handlePageChange(filters.page - 1)}
+              onClick={handleGenerateMore}
+              disabled={isLoading}
             >
-              <ChevronLeft aria-hidden="true" size={16} />
-              Anterior
+              <RefreshCw aria-hidden="true" size={18} />
+              Otra frase
             </button>
 
-            <span>
-              Página {filters.page} de {totalPages}
-            </span>
-
-            <button
-              className="ui-button ui-button-secondary ui-button-sm"
-              type="button"
-              disabled={filters.page >= totalPages}
-              onClick={() => handlePageChange(filters.page + 1)}
-            >
-              Siguiente
-              <ChevronRight aria-hidden="true" size={16} />
-            </button>
+            {totalPages > 1 ? (
+              <span>
+                Selección {filters.page} de {totalPages}
+              </span>
+            ) : null}
           </div>
-        </>
+        </div>
       ) : null}
     </section>
   )
