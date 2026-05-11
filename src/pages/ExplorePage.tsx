@@ -293,137 +293,85 @@ export function ExplorePage() {
           />
         </label>
 
-       <div className="explore-filter-control">
-  <button
-    className="filter-trigger"
-    type="button"
-    aria-expanded={activeFilterDrawer === 'situation'}
-    aria-controls="situation-filter-drawer"
-    onClick={() =>
-      setActiveFilterDrawer((currentDrawer) =>
-        currentDrawer === 'situation' ? null : 'situation',
-      )
-    }
-  >
-    <Filter aria-hidden="true" size={18} />
-    <span>{selectedSituationLabel}</span>
-    <ChevronDown aria-hidden="true" size={16} />
-  </button>
-
-  {activeFilterDrawer === 'situation' ? (
-    <div
-      className="filter-drawer"
-      id="situation-filter-drawer"
-      aria-label="Seleccionar situación"
-    >
-      <div className="filter-drawer-header">
-        <strong>Situación</strong>
-        <button
-          type="button"
-          aria-label="Cerrar selector de situación"
-          onClick={() => setActiveFilterDrawer(null)}
-        >
-          <X aria-hidden="true" size={16} />
-        </button>
-      </div>
-
-      <div className="filter-drawer-options">
-        <button
-          className={
-            filters.situation === ''
-              ? 'filter-option filter-option-active'
-              : 'filter-option'
+        <FilterControl
+          icon={<Filter aria-hidden="true" size={18} />}
+          label={selectedSituationLabel}
+          isOpen={activeFilterDrawer === 'situation'}
+          onToggle={() =>
+            setActiveFilterDrawer((d) => (d === 'situation' ? null : 'situation'))
           }
-          type="button"
-          onClick={() => handleSituationChange('')}
+          onClose={() => setActiveFilterDrawer(null)}
+          drawerId="situation-filter-drawer"
+          drawerAriaLabel="Seleccionar situación"
+          drawerTitle="Situación"
         >
-          Todas las situaciones
-        </button>
-
-        {situations.map((situation) => (
           <button
             className={
-              filters.situation === situation.slug
+              filters.situation === ''
                 ? 'filter-option filter-option-active'
                 : 'filter-option'
             }
-            key={situation._id}
             type="button"
-            onClick={() => handleSituationChange(situation.slug)}
+            onClick={() => handleSituationChange('')}
           >
-            {situation.name}
+            Todas las situaciones
           </button>
-        ))}
-      </div>
-    </div>
-  ) : null}
-</div>
 
-<div className="explore-filter-control">
-  <button
-    className="filter-trigger"
-    type="button"
-    aria-expanded={activeFilterDrawer === 'quoteType'}
-    aria-controls="quote-type-filter-drawer"
-    onClick={() =>
-      setActiveFilterDrawer((currentDrawer) =>
-        currentDrawer === 'quoteType' ? null : 'quoteType',
-      )
-    }
-  >
-    <SlidersHorizontal aria-hidden="true" size={18} />
-    <span>{selectedQuoteTypeLabel}</span>
-    <ChevronDown aria-hidden="true" size={16} />
-  </button>
+          {situations.map((situation) => (
+            <button
+              className={
+                filters.situation === situation.slug
+                  ? 'filter-option filter-option-active'
+                  : 'filter-option'
+              }
+              key={situation._id}
+              type="button"
+              onClick={() => handleSituationChange(situation.slug)}
+            >
+              {situation.name}
+            </button>
+          ))}
+        </FilterControl>
 
-  {activeFilterDrawer === 'quoteType' ? (
-    <div
-      className="filter-drawer"
-      id="quote-type-filter-drawer"
-      aria-label="Seleccionar tipo de frase"
-    >
-      <div className="filter-drawer-header">
-        <strong>Tipo de frase</strong>
-        <button
-          type="button"
-          aria-label="Cerrar selector de tipo de frase"
-          onClick={() => setActiveFilterDrawer(null)}
-        >
-          <X aria-hidden="true" size={16} />
-        </button>
-      </div>
-
-      <div className="filter-drawer-options">
-        <button
-          className={
-            filters.quoteType === ''
-              ? 'filter-option filter-option-active'
-              : 'filter-option'
+        <FilterControl
+          icon={<SlidersHorizontal aria-hidden="true" size={18} />}
+          label={selectedQuoteTypeLabel}
+          isOpen={activeFilterDrawer === 'quoteType'}
+          onToggle={() =>
+            setActiveFilterDrawer((d) => (d === 'quoteType' ? null : 'quoteType'))
           }
-          type="button"
-          onClick={() => handleQuoteTypeChange('')}
+          onClose={() => setActiveFilterDrawer(null)}
+          drawerId="quote-type-filter-drawer"
+          drawerAriaLabel="Seleccionar tipo de frase"
+          drawerTitle="Tipo de frase"
         >
-          Todos los tipos
-        </button>
-
-        {quoteTypes.map((quoteType) => (
           <button
             className={
-              filters.quoteType === quoteType.slug
+              filters.quoteType === ''
                 ? 'filter-option filter-option-active'
                 : 'filter-option'
             }
-            key={quoteType._id}
             type="button"
-            onClick={() => handleQuoteTypeChange(quoteType.slug)}
+            onClick={() => handleQuoteTypeChange('')}
           >
-            {quoteType.name}
+            Todos los tipos
           </button>
-        ))}
-      </div>
-    </div>
-  ) : null}
-</div>
+
+          {quoteTypes.map((quoteType) => (
+            <button
+              className={
+                filters.quoteType === quoteType.slug
+                  ? 'filter-option filter-option-active'
+                  : 'filter-option'
+              }
+              key={quoteType._id}
+              type="button"
+              onClick={() => handleQuoteTypeChange(quoteType.slug)}
+            >
+              {quoteType.name}
+            </button>
+          ))}
+        </FilterControl>
 
         <button className="ui-button ui-button-primary ui-button-md" type="submit">
           Buscar
