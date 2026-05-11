@@ -1,15 +1,15 @@
 .page-section {
   width: min(100%, var(--layout-max-width));
   margin: 0 auto;
-  padding: 72px 24px;
+  padding: 72px var(--layout-page-padding);
 }
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -25,11 +25,16 @@
   display: inline-flex;
   align-items: center;
   margin-top: 28px;
-  color: var(--color-primary);
-  font-weight: 700;
+  color: var(--color-primary-hover);
+  font-weight: 800;
   text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .text-cta:hover {
+  color: var(--color-text);
   text-decoration: underline;
+  transform: translateX(3px);
 }
