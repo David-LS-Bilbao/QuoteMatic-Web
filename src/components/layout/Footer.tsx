@@ -1,7 +1,6 @@
 import { ExternalLink, Rocket } from 'lucide-react'
 
-
-// footer de la app. incluye enlaces a documentación y repositorio
+// Incluye enlaces a la documentación Swagger y al repositorio GitHub.
 export function Footer() {
   return (
     <footer className="site-footer">

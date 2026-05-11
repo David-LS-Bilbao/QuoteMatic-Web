@@ -1,5 +1,3 @@
-// Navbar component
-
 import { Compass, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router'
 
@@ -10,7 +8,6 @@ const navItems = [
   { to: '/about', label: 'Proyecto' },
 ]
 
-// barra de navegación principal 
 export function Navbar() {
   return (
     <header className="site-header">
@@ -20,7 +17,7 @@ export function Navbar() {
         </span>
         <span className="brand-text">
           <strong>QuoteMatic</strong>
-          <small>Cosmic quotes</small>
+          <small>Frases con intención</small>
         </span>
       </NavLink>
 

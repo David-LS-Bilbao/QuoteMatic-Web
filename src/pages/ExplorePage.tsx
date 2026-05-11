@@ -1,10 +1,9 @@
-// placeholder page
+// Página de exploración — placeholder hasta conectar con la API de QuoteMatic.
 
 import { Filter, Shuffle, SlidersHorizontal } from 'lucide-react'
 
 import { Badge, EmptyState } from '../components/ui'
 
-// Componente ExplorePage.
 export function ExplorePage() {
   return (
     <section className="page-section placeholder-page">

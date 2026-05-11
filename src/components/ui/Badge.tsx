@@ -1,16 +1,13 @@
-// Componente reusable para badges
-
 import type { HTMLAttributes, ReactNode } from 'react'
 
-// Tipos
 type BadgeVariant = 'primary' | 'accent' | 'muted'
-// Propiedades
+
+/** Etiqueta visual para estados como "Demo visual", "Próximamente" o "API REST". */
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   children: ReactNode
   variant?: BadgeVariant
 }
 
-// Componente Badge
 export function Badge({
   children,
   variant = 'primary',
@@ -27,9 +24,3 @@ export function Badge({
     </span>
   )
 }
-
-
-/*
-crea una etiqueta visual reutilizable para estados como Demo visual,
-Próximamente o API REST.
-*/

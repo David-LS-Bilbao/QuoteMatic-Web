@@ -1,18 +1,15 @@
-// Componente reusable para botones
-
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 type ButtonSize = 'sm' | 'md'
 
-// Propiedades de los botones
+/** Botón reutilizable con variantes visuales y soporte completo para atributos HTML nativos. */
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode
   variant?: ButtonVariant
   size?: ButtonSize
 }
 
-// Componente Button
 export function Button({
   children,
   variant = 'primary',
@@ -35,9 +32,3 @@ export function Button({
     </button>
   )
 }
-/*
-crea un botón reutilizable con variantes
-para diferentes tamaños, colores y estilos.
-visuales mínimas y soporte para props normales de <button>.
-*/
-
