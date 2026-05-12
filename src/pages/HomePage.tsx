@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-// importamos lucide react, que es  una libreria de iconos.
 import {
   ArrowRight,
   Compass,
@@ -7,6 +6,7 @@ import {
   RefreshCw,
   Sparkles,
 } from 'lucide-react'
+
 import { Link } from 'react-router'
 
 import { Badge, QuoteCard } from '../components/ui'
@@ -43,7 +43,7 @@ export function HomePage() {
   const [isQuoteTransitioning, setIsQuoteTransitioning] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  async function loadRandomQuote() {
+async function loadRandomQuote() {
   setIsLoading(true)
   setIsQuoteTransitioning(true)
   setErrorMessage(null)
@@ -100,12 +100,16 @@ export function HomePage() {
       <div className="home-hero">
         <div className="home-hero-content">
 
-          <div className="home-badges" aria-label="Caracteristicas principales">
-            <Badge>Frases por situacion</Badge>
-            <Badge variant="accent">Inspiracion diaria</Badge>
-          
-          </div>
-          
+
+
+        <div className="home-badges" aria-label="Características principales">
+  <Badge>Frases por situación</Badge>
+  <Badge variant="accent">Inspiración diaria</Badge>
+  <Badge variant="muted">Favoritos personales</Badge>
+</div>
+
+
+
           <h1>Frases para cada momento, situación y estado mental.</h1>
 
           <p className="page-lead">
@@ -186,17 +190,17 @@ export function HomePage() {
         })}
       </div>
 
-            <aside className="tech-panel" aria-label="Cómo funciona QuoteMatic">
-              <div>
-                <p className="eyebrow">Cómo funciona</p>
-                <h2>Elige un contexto y encuentra una frase que encaje contigo.</h2>
-              </div>
+          <aside className="tech-panel" aria-label="Cómo funciona QuoteMatic">
+        <div>
+          <p className="eyebrow">Cómo funciona</p>
+          <h2>Elige un contexto y encuentra una frase que encaje contigo.</h2>
+        </div>
 
-              <p>
-                QuoteMatic organiza frases por situación y estilo para ayudarte a
-                encontrar inspiración de forma rápida, clara y sin ruido visual.
-              </p>
-            </aside>
+        <p>
+          QuoteMatic organiza frases por situación y estilo para ayudarte a
+          encontrar inspiración de forma rápida, clara y sin ruido visual.
+        </p>
+      </aside>
     </section>
   )
 }
