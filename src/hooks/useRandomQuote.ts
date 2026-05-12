@@ -22,6 +22,7 @@ export function useRandomQuote(): UseRandomQuoteResult {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const timeoutRef = useRef<number | null>(null)
+  const hasLoadedOnceRef = useRef(false)
 
   function clearTransitionTimeout() {
     if (timeoutRef.current !== null) {
@@ -30,21 +31,16 @@ export function useRandomQuote(): UseRandomQuoteResult {
     }
   }
 
-  const finishTransition = useCallback(
-    (callback: () => void) => {
-      clearTransitionTimeout()
+  const finishTransition = useCallback((callback: () => void) => {
+    clearTransitionTimeout()
 
-      timeoutRef.current = window.setTimeout(() => {
-        callback()
-        setIsQuoteTransitioning(false)
-        setIsLoading(false)
-        timeoutRef.current = null
-      }, TRANSITION_DELAY_MS)
-    },
-    [],
-  )
-
-  const hasLoadedOnceRef = useRef(false)
+    timeoutRef.current = window.setTimeout(() => {
+      callback()
+      setIsQuoteTransitioning(false)
+      setIsLoading(false)
+      timeoutRef.current = null
+    }, TRANSITION_DELAY_MS)
+  }, [])
 
   const loadRandomQuote = useCallback(async () => {
     setIsLoading(true)
@@ -56,24 +52,42 @@ export function useRandomQuote(): UseRandomQuoteResult {
 
       finishTransition(() => {
         setQuote(response.data)
-          hasLoadedOnceRef.current = true
+        hasLoadedOnceRef.current = true
       })
     } catch {
       finishTransition(() => {
         setErrorMessage(ERROR_MESSAGE)
-          hasLoadedOnceRef.current = true
+        hasLoadedOnceRef.current = true
       })
     }
   }, [finishTransition])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadRandomQuote()
+    let isMounted = true
+
+    getRandomQuote()
+      .then((response) => {
+        if (!isMounted) return
+
+        finishTransition(() => {
+          setQuote(response.data)
+          hasLoadedOnceRef.current = true
+        })
+      })
+      .catch(() => {
+        if (!isMounted) return
+
+        finishTransition(() => {
+          setErrorMessage(ERROR_MESSAGE)
+          hasLoadedOnceRef.current = true
+        })
+      })
 
     return () => {
+      isMounted = false
       clearTransitionTimeout()
     }
-  }, [loadRandomQuote])
+  }, [finishTransition])
 
   return {
     quote,
