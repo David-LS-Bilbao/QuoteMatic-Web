@@ -1,14 +1,13 @@
-import { Outlet } from 'react-router'
-
 import { Footer } from './Footer'
 import { Navbar } from './Navbar'
+import { PageTransition } from './PageTransition'
 
 export function AppLayout() {
   return (
     <div className="app-shell">
       <Navbar />
       <main className="app-main">
-        <Outlet />
+        <PageTransition />
       </main>
       <Footer />
     </div>
