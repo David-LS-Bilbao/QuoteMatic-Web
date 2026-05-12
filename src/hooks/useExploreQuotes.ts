@@ -1,5 +1,5 @@
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getQuoteTypes, getSituations } from '../services/catalogService'
 import { getQuotes } from '../services/quotesService'
@@ -8,6 +8,7 @@ import type { Quote } from '../types/quote'
 
 const STORAGE_KEY = 'quotematic:explore-filters'
 const PAGE_SIZE = 2
+const TRANSITION_DELAY_MS = 180
 
 export type ExploreFilters = {
   search: string
@@ -29,6 +30,8 @@ export type UseExploreQuotesResult = {
   totalPages: number
   totalQuotes: number
   isLoading: boolean
+  isResultsTransitioning: boolean
+  hasCompletedInitialLoad: boolean
   catalogError: string | null
   quotesError: string | null
   activeFilterDrawer: ActiveFilterDrawer
@@ -82,10 +85,14 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   const [totalQuotes, setTotalQuotes] = useState(0)
   const [refreshIndex, setRefreshIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isResultsTransitioning, setIsResultsTransitioning] = useState(false)
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false)
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [quotesError, setQuotesError] = useState<string | null>(null)
   const [activeFilterDrawer, setActiveFilterDrawer] =
     useState<ActiveFilterDrawer>(null)
+  const hasVisibleQuotesRef = useRef(false)
+  const transitionTimeoutRef = useRef<number | null>(null)
 
   const hasActiveFilters = useMemo(
     () => Boolean(filters.search || filters.situation || filters.quoteType),
@@ -143,6 +150,25 @@ export function useExploreQuotes(): UseExploreQuotesResult {
 
   useEffect(() => {
     let isMounted = true
+    const shouldTransition = hasVisibleQuotesRef.current
+
+    function finish(apply: () => void) {
+      if (shouldTransition) {
+        transitionTimeoutRef.current = window.setTimeout(() => {
+          if (!isMounted) return
+          apply()
+          setHasCompletedInitialLoad(true)
+          setIsLoading(false)
+          setIsResultsTransitioning(false)
+          transitionTimeoutRef.current = null
+        }, TRANSITION_DELAY_MS)
+      } else {
+        apply()
+        setHasCompletedInitialLoad(true)
+        setIsLoading(false)
+        setIsResultsTransitioning(false)
+      }
+    }
 
     getQuotes({
       search: filters.search || undefined,
@@ -154,53 +180,66 @@ export function useExploreQuotes(): UseExploreQuotesResult {
       .then((response) => {
         if (!isMounted) return
 
-        setQuotes(response.data)
-        setTotalPages(response.meta.totalPages || 1)
-        setTotalQuotes(response.meta.total)
-        setQuotesError(null)
+        finish(() => {
+          setQuotes(response.data)
+          setTotalPages(response.meta.totalPages || 1)
+          setTotalQuotes(response.meta.total)
+          setQuotesError(null)
+          hasVisibleQuotesRef.current = response.data.length > 0
+        })
       })
       .catch(() => {
         if (!isMounted) return
 
-        setQuotes([])
-        setTotalPages(1)
-        setTotalQuotes(0)
-        setQuotesError(
-          'No hemos podido cargar frases. Revisa la conexión o prueba otros filtros.',
-        )
-      })
-      .finally(() => {
-        if (!isMounted) return
-
-        setIsLoading(false)
+        finish(() => {
+          setQuotes([])
+          setTotalPages(1)
+          setTotalQuotes(0)
+          hasVisibleQuotesRef.current = false
+          setQuotesError(
+            'No hemos podido cargar frases. Revisa la conexión o prueba otros filtros.',
+          )
+        })
       })
 
     return () => {
       isMounted = false
+      if (transitionTimeoutRef.current !== null) {
+        window.clearTimeout(transitionTimeoutRef.current)
+        transitionTimeoutRef.current = null
+      }
     }
   }, [filters, refreshIndex])
+
+  function prepareQuoteRequest() {
+    setIsLoading(true)
+
+    if (hasVisibleQuotesRef.current) {
+      setIsResultsTransitioning(true)
+    }
+  }
 
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    setIsLoading(true)
+    prepareQuoteRequest()
     setFilters((f) => ({ ...f, search: searchInput.trim(), page: 1 }))
   }
 
   function handleSituationChange(value: string) {
-    setIsLoading(true)
+    prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setFilters((f) => ({ ...f, situation: value, page: 1 }))
   }
 
   function handleQuoteTypeChange(value: string) {
-    setIsLoading(true)
+    prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setFilters((f) => ({ ...f, quoteType: value, page: 1 }))
   }
 
   function handleGenerateMore() {
-    setIsLoading(true)
+    prepareQuoteRequest()
 
     setFilters((f) => ({
       ...f,
@@ -211,7 +250,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   }
 
   function handleClearFilters() {
-    setIsLoading(true)
+    prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setSearchInput('')
     setFilters({ search: '', situation: '', quoteType: '', page: 1 })
@@ -226,6 +265,8 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     totalPages,
     totalQuotes,
     isLoading,
+    isResultsTransitioning,
+    hasCompletedInitialLoad,
     catalogError,
     quotesError,
     activeFilterDrawer,

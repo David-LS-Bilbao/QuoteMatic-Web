@@ -23,7 +23,7 @@ export function ExploreSummary({
 
       <div className="explore-summary" aria-live="polite">
         {isLoading ? (
-          <span>Buscando una frase...</span>
+          <span>Afinando recomendación...</span>
         ) : (
           <span>
             {totalQuotes}{' '}

@@ -39,6 +39,8 @@ export function ExplorePage() {
       <ExploreResults
         quotesError={explore.quotesError}
         isLoading={explore.isLoading}
+        isResultsTransitioning={explore.isResultsTransitioning}
+        hasCompletedInitialLoad={explore.hasCompletedInitialLoad}
         quotes={explore.quotes}
         filters={explore.filters}
         totalPages={explore.totalPages}

@@ -8,6 +8,8 @@ type ExploreResultsProps = Pick<
   UseExploreQuotesResult,
   | 'quotesError'
   | 'isLoading'
+  | 'isResultsTransitioning'
+  | 'hasCompletedInitialLoad'
   | 'quotes'
   | 'filters'
   | 'totalPages'
@@ -18,6 +20,8 @@ type ExploreResultsProps = Pick<
 export function ExploreResults({
   quotesError,
   isLoading,
+  isResultsTransitioning,
+  hasCompletedInitialLoad,
   quotes,
   filters,
   totalPages,
@@ -41,7 +45,7 @@ export function ExploreResults({
     )
   }
 
-  if (isLoading) {
+  if (isLoading && quotes.length === 0 && !hasCompletedInitialLoad) {
     return (
       <div className="explore-result" aria-label="Frase cargando">
         <div className="explore-main-card">
@@ -73,7 +77,14 @@ export function ExploreResults({
   }
 
   return (
-    <div className="explore-result" aria-label="Frase recomendada">
+    <div
+      className={
+        isResultsTransitioning
+          ? 'explore-result explore-result-transition explore-result-transition-active'
+          : 'explore-result explore-result-transition'
+      }
+      aria-label="Frase recomendada"
+    >
       <div className="explore-main-card">
         <div className="explore-result-label">
           <Sparkles aria-hidden="true" size={18} />

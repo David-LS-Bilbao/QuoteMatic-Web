@@ -629,6 +629,22 @@
   margin-top: 8px;
 }
 
+.explore-result-transition {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal),
+    filter var(--transition-normal);
+}
+
+.explore-result-transition-active {
+  opacity: 0.42;
+  transform: translateY(6px) scale(0.99);
+  filter: blur(1.5px);
+}
+
 .explore-main-card {
   position: relative;
   z-index: 1;
@@ -895,8 +911,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .filter-drawer {
+  .filter-drawer,
+  .explore-result-transition,
+  .explore-result-transition-active {
     animation: none;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .explore-result-transition-active {
+    opacity: 1;
   }
 
   .filter-option:hover {
