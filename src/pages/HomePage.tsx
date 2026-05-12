@@ -19,21 +19,21 @@ const featureCards = [
     title: 'Explora por situación',
     description:
       'Encuentra frases pensadas para trabajo, estudios, estrés o decisiones difíciles.',
-    badge: 'Disponible',
+    badge: 'Contexto',
   },
   {
     icon: Sparkles,
     title: 'Filtra por estilo',
     description:
-      'Combina situaciones con estilos como reflexión, motivación o filosofía.',
-    badge: 'Disponible',
+      'Combina cada situación con frases estoicas, filosóficas, motivacionales o reflexivas.',
+    badge: 'Estilo',
   },
   {
     icon: Heart,
-    title: 'Crea tu biblioteca personal',
+    title: 'Guarda tus favoritas',
     description:
-      'Guarda tus frases favoritas y construye un espacio propio de inspiración.',
-    badge: 'Espacio personal',
+      'Crea tu propia biblioteca de frases y vuelve a ellas cuando necesites inspiración.',
+    badge: 'Favoritos',
   },
 ]
 
@@ -105,9 +105,7 @@ export function HomePage() {
             <Badge variant="accent">Inspiracion diaria</Badge>
           
           </div>
-
-      
-
+          
           <h1>Frases para cada momento, situación y estado mental.</h1>
 
           <p className="page-lead">
