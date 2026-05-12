@@ -261,6 +261,26 @@
   position: relative;
 }
 
+
+.home-quote-transition {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal),
+    filter var(--transition-normal);
+}
+
+.home-quote-transition-active {
+  opacity: 0.35;
+  transform: translateY(8px) scale(0.985);
+  filter: blur(2px);
+}
+
+
+
+
 .home-hero-card::before {
   content: '';
   position: absolute;
@@ -370,8 +390,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feature-card:hover {
+  .feature-card:hover,
+  .home-quote-transition,
+  .home-quote-transition-active {
     transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .home-quote-transition-active {
+    opacity: 1;
   }
 }
 
@@ -599,6 +627,22 @@
   display: grid;
   gap: 18px;
   margin-top: 8px;
+}
+
+.explore-result-transition {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal),
+    filter var(--transition-normal);
+}
+
+.explore-result-transition-active {
+  opacity: 0.42;
+  transform: translateY(6px) scale(0.99);
+  filter: blur(1.5px);
 }
 
 .explore-main-card {
@@ -867,8 +911,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .filter-drawer {
+  .filter-drawer,
+  .explore-result-transition,
+  .explore-result-transition-active {
     animation: none;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .explore-result-transition-active {
+    opacity: 1;
   }
 
   .filter-option:hover {
@@ -930,5 +983,31 @@
 
   .filter-drawer-options {
     max-height: min(52vh, 380px);
+  }
+}
+
+/* ── Page transition ────────────────────────────────────────────── */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.page-transition {
+  animation: page-enter 600ms ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
   }
 }
