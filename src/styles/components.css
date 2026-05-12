@@ -261,6 +261,26 @@
   position: relative;
 }
 
+
+.home-quote-transition {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal),
+    filter var(--transition-normal);
+}
+
+.home-quote-transition-active {
+  opacity: 0.35;
+  transform: translateY(8px) scale(0.985);
+  filter: blur(2px);
+}
+
+
+
+
 .home-hero-card::before {
   content: '';
   position: absolute;
@@ -370,8 +390,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feature-card:hover {
+  .feature-card:hover,
+  .home-quote-transition,
+  .home-quote-transition-active {
     transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .home-quote-transition-active {
+    opacity: 1;
   }
 }
 

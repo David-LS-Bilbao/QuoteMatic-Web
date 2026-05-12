@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+// importamos lucide react, que es  una libreria de iconos.
 import {
   ArrowRight,
-  Code2,
   Compass,
   Heart,
   RefreshCw,
@@ -19,44 +19,53 @@ const featureCards = [
     title: 'Explora por situación',
     description:
       'Encuentra frases pensadas para trabajo, estudios, estrés o decisiones difíciles.',
-    badge: 'Disponible pronto',
+    badge: 'Disponible',
   },
   {
     icon: Sparkles,
     title: 'Filtra por estilo',
     description:
-      'Combina tipos de frase como estoicas, filosóficas, motivacionales o reflexivas.',
-    badge: 'API preparada',
+      'Combina situaciones con estilos como reflexión, motivación o filosofía.',
+    badge: 'Disponible',
   },
   {
     icon: Heart,
-    title: 'Guarda tus favoritas',
+    title: 'Crea tu biblioteca personal',
     description:
-      'La base visual queda preparada para favoritos y frases personales en próximas ramas.',
-    badge: 'Próximamente',
+      'Guarda tus frases favoritas y construye un espacio propio de inspiración.',
+    badge: 'Espacio personal',
   },
 ]
 
 export function HomePage() {
   const [quote, setQuote] = useState<Quote | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isQuoteTransitioning, setIsQuoteTransitioning] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   async function loadRandomQuote() {
-    setIsLoading(true)
-    setErrorMessage(null)
+  setIsLoading(true)
+  setIsQuoteTransitioning(true)
+  setErrorMessage(null)
 
-    try {
-      const response = await getRandomQuote()
+  try {
+    const response = await getRandomQuote()
+
+    window.setTimeout(() => {
       setQuote(response.data)
-    } catch {
-      setErrorMessage(
-        'No hemos podido cargar una frase real ahora mismo. Inténtalo de nuevo.',
-      )
-    } finally {
+      setIsQuoteTransitioning(false)
       setIsLoading(false)
-    }
+    }, 180)
+  } catch {
+    window.setTimeout(() => {
+      setErrorMessage(
+        'No hemos podido cargar una frase ahora mismo. Inténtalo de nuevo.',
+      )
+      setIsQuoteTransitioning(false)
+      setIsLoading(false)
+    }, 180)
   }
+}
 
   useEffect(() => {
     let isMounted = true
@@ -72,7 +81,7 @@ export function HomePage() {
         if (!isMounted) return
 
         setErrorMessage(
-          'No hemos podido cargar una frase real ahora mismo. Inténtalo de nuevo.',
+          'No hemos podido cargar una frase ahora mismo. Inténtalo de nuevo.',
         )
       })
       .finally(() => {
@@ -90,20 +99,20 @@ export function HomePage() {
     <section className="page-section home-page">
       <div className="home-hero">
         <div className="home-hero-content">
-          <div className="home-badges" aria-label="Estado del proyecto">
-            <Badge>React + TypeScript</Badge>
-            <Badge variant="accent">Cosmos UI</Badge>
-            <Badge variant="muted">API REST</Badge>
+
+          <div className="home-badges" aria-label="Caracteristicas principales">
+            <Badge>Frases por situacion</Badge>
+            <Badge variant="accent">Inspiracion diaria</Badge>
+          
           </div>
 
-          <p className="eyebrow">Frontend React independiente</p>
+      
 
           <h1>Frases para cada momento, situación y estado mental.</h1>
 
           <p className="page-lead">
-            QuoteMatic Web es una interfaz visual para explorar frases,
-            autores y situaciones consumiendo una API REST propia creada con
-            Node, Express, TypeScript y MongoDB.
+            Explora frases organizadas por situación y estilo. Encuentra inspiración
+            para estudiar, trabajar, tomar decisiones o afrontar momentos de estrés.
           </p>
 
           <div className="home-hero-actions">
@@ -118,45 +127,45 @@ export function HomePage() {
               onClick={loadRandomQuote}
               disabled={isLoading}
             >
-              {isLoading ? 'Cargando...' : 'Nueva frase'}
+              {isLoading && !quote ? 'Cargando...' : 'Sorpréndeme'}
               <RefreshCw aria-hidden="true" size={18} />
             </button>
-
-            <a
-              className="ui-button ui-button-ghost ui-button-md"
-              href="https://quotematic.davlos.es/api-docs/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Ver API
-              <Code2 aria-hidden="true" size={18} />
-            </a>
+      
           </div>
         </div>
 
-        <div className="home-hero-card" aria-label="Frase destacada">
-          {isLoading ? (
-            <QuoteCard
-              quote="Buscando una frase en el universo QuoteMatic..."
-              meta="Conectando con la API real"
-              isMock
-            />
-          ) : errorMessage ? (
-            <QuoteCard quote={errorMessage} meta="Error controlado" isMock />
-          ) : quote ? (
-            <QuoteCard
-              quote={quote.text}
-              author={quote.authorText ?? 'QuoteMatic'}
-              meta="Frase real desde la API"
-            />
-          ) : (
-            <QuoteCard
-              quote="No hay frase disponible en este momento."
-              meta="Estado vacío"
-              isMock
-            />
-          )}
-        </div>
+       <div className="home-hero-card" aria-label="Frase destacada">
+  <div
+    className={
+      isQuoteTransitioning
+        ? 'home-quote-transition home-quote-transition-active'
+        : 'home-quote-transition'
+    }
+  >
+    {isLoading && !quote ? (
+      <QuoteCard
+        quote="Buscando una frase para ti..."
+        meta="Preparando inspiración"
+        isMock
+      />
+    ) : errorMessage ? (
+      <QuoteCard quote={errorMessage} meta="Inténtalo de nuevo" isMock />
+    ) : quote ? (
+      <QuoteCard
+        quote={quote.text}
+        author={quote.authorText ?? 'QuoteMatic'}
+        meta="Frase destacada"
+      />
+    ) : (
+      <QuoteCard
+        quote="No hay frase disponible en este momento."
+        meta="Estado vacío"
+        isMock
+      />
+    )}
+  </div>
+</div>
+   
       </div>
 
       <div className="feature-grid" aria-label="Funciones principales">
@@ -179,18 +188,17 @@ export function HomePage() {
         })}
       </div>
 
-      <aside className="tech-panel" aria-label="Resumen tecnico del proyecto">
-        <div>
-          <p className="eyebrow">Preparado para portfolio</p>
-          <h2>Una landing visual conectada con datos reales.</h2>
-        </div>
+            <aside className="tech-panel" aria-label="Cómo funciona QuoteMatic">
+              <div>
+                <p className="eyebrow">Cómo funciona</p>
+                <h2>Elige un contexto y encuentra una frase que encaje contigo.</h2>
+              </div>
 
-        <p>
-          Esta Home ya consume una frase aleatoria desde la API REST de
-          QuoteMatic. Las siguientes ramas añadirán explorador público,
-          autenticación, favoritos y CRUD privado.
-        </p>
-      </aside>
+              <p>
+                QuoteMatic organiza frases por situación y estilo para ayudarte a
+                encontrar inspiración de forma rápida, clara y sin ruido visual.
+              </p>
+            </aside>
     </section>
   )
 }
