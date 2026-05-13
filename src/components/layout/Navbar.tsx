@@ -45,6 +45,19 @@ export function Navbar() {
 
         {isAuthenticated ? (
           <NavLink
+            to="/favorites"
+            className={({ isActive }) =>
+              isActive ? 'nav-link nav-link-active' : 'nav-link'
+            }
+          >
+            Favoritos
+          </NavLink>
+        ) : null}
+
+
+
+        {isAuthenticated ? (
+          <NavLink
             to="/account"
             className={({ isActive }) =>
               isActive ? 'nav-link nav-link-active' : 'nav-link'
