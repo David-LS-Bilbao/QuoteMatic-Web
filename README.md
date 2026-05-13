@@ -26,7 +26,7 @@ Ya implementado:
 - ESLint.
 - `.env.example` con URL base de API.
 - Design System visual Cosmos.
-- Layout principal.
+- Layout principal con transición suave entre rutas (`PageTransition`).
 - Navbar y Footer responsive con estilo glass.
 - Componentes UI reutilizables:
   - `Button`
@@ -34,18 +34,20 @@ Ya implementado:
   - `QuoteCard`
   - `EmptyState`
 - Home visual conectada a la API real.
-- Carga de frase aleatoria pública desde `GET /api/quotes/random`.
-- Estados de carga, error y éxito en Home.
+  - Frase aleatoria desde `GET /api/quotes/random` con transición suave al cambiar.
+  - Estados de carga, error y éxito.
+- Explorador público de frases conectado a `GET /api/quotes`.
+  - Filtros por situación y tipo de frase.
+  - Búsqueda por texto.
+  - Paginación con navegación cíclica.
+  - Transición suave al cambiar resultados.
+  - Filtros persistidos en `localStorage`.
 - Cliente API base con `fetch`.
 - Tipos TypeScript base para respuestas API y frases.
 - Documentación técnica en `docs/`.
 
 Pendiente:
 
-- Explorador público de frases.
-- Filtros por situación y tipo de frase.
-- Búsqueda de frases.
-- Paginación.
 - Auth: login, registro, logout y sesión.
 - Favoritos.
 - Mis frases privadas.
@@ -159,11 +161,13 @@ credentials: 'include'
 
 | Ruta | Estado | Descripción |
 | ---- | ------ | ----------- |
-| `/` | Implementada | Home visual conectada a frase aleatoria real |
-| `/explore` | Placeholder visual | Futuro explorador público de frases |
+| `/` | Implementada | Home con frase aleatoria real y transición suave |
+| `/explore` | Implementada | Explorador público con filtros, búsqueda y paginación |
 | `/authors` | Placeholder visual | Futuro listado de autores |
 | `/about` | Implementada visualmente | Información técnica del proyecto |
 | `*` | Implementada | Página 404 |
+
+Todas las rutas comparten transición de entrada (fade + slide) gestionada por `PageTransition`.
 
 ## Arquitectura actual
 
@@ -171,23 +175,38 @@ credentials: 'include'
 QuoteMatic-Web/
 ├── docs/
 │   ├── memoria-feat-ui-design-system.md
-│   └── memoria-feat-home-random-quote.md
+│   ├── memoria-feat-home-random-quote.md
+│   └── refactorizacion-paginas.md
 ├── public/
 ├── src/
 │   ├── app/
 │   │   ├── App.tsx
 │   │   └── router.tsx
 │   ├── components/
+│   │   ├── explore/
+│   │   │   ├── ExploreFilters.tsx
+│   │   │   ├── ExploreHeader.tsx
+│   │   │   ├── ExploreResults.tsx
+│   │   │   └── ExploreSummary.tsx
+│   │   ├── home/
+│   │   │   ├── HomeFeatureGrid.tsx
+│   │   │   ├── HomeInfoPanel.tsx
+│   │   │   └── HomeQuoteSpotlight.tsx
 │   │   ├── layout/
 │   │   │   ├── AppLayout.tsx
 │   │   │   ├── Footer.tsx
-│   │   │   └── Navbar.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── PageTransition.tsx
 │   │   └── ui/
 │   │       ├── Badge.tsx
 │   │       ├── Button.tsx
 │   │       ├── EmptyState.tsx
+│   │       ├── FilterControl.tsx
 │   │       ├── QuoteCard.tsx
 │   │       └── index.ts
+│   ├── hooks/
+│   │   ├── useExploreQuotes.ts
+│   │   └── useRandomQuote.ts
 │   ├── pages/
 │   │   ├── AboutPage.tsx
 │   │   ├── AuthorsPage.tsx
@@ -196,6 +215,7 @@ QuoteMatic-Web/
 │   │   └── NotFoundPage.tsx
 │   ├── services/
 │   │   ├── apiClient.ts
+│   │   ├── catalogService.ts
 │   │   └── quotesService.ts
 │   ├── styles/
 │   │   ├── components.css
@@ -204,7 +224,10 @@ QuoteMatic-Web/
 │   │   └── variables.css
 │   ├── types/
 │   │   ├── api.ts
+│   │   ├── catalog.ts
 │   │   └── quote.ts
+│   ├── utils/
+│   │   └── quoteHelpers.ts
 │   └── main.tsx
 ├── .env.example
 ├── README.md
@@ -216,10 +239,14 @@ QuoteMatic-Web/
 | Capa | Responsabilidad |
 | ---- | --------------- |
 | `app` | Montaje de la aplicación y rutas |
-| `pages` | Composición de pantallas |
-| `components/layout` | Layout general, navegación y footer |
+| `pages` | Composición de pantallas (sin lógica) |
+| `hooks` | Estado, efectos y handlers por feature |
+| `components/layout` | Layout general, navegación, footer y transición de ruta |
+| `components/home` | Bloques visuales de la página Home |
+| `components/explore` | Bloques visuales de la página Explore |
 | `components/ui` | Componentes visuales reutilizables |
 | `services` | Cliente HTTP y servicios por dominio |
+| `utils` | Funciones puras sin dependencia de React |
 | `types` | Tipos TypeScript de API y dominio |
 | `styles` | Variables, estilos globales, utilidades y componentes |
 
@@ -256,7 +283,8 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 0 | `feat/project-bootstrap` | Completado | Bootstrap Vite + React + TS |
 | 1 | `feat/ui-design-system` | Completado | Sistema visual Cosmos |
 | 2 | `feat/home-random-quote` | Completado | Home conectada a API real |
-| 3 | `feat/explore-quotes` | Pendiente | Explorador público con filtros |
+| 3 | `feat/explore-quotes` | Completado | Explorador público con filtros, búsqueda y paginación |
+| — | `fix/final-demo-stability` | En curso | Refactor Home/Explore, transición de rutas y estabilidad |
 | 4 | `feat/auth-session` | Pendiente | Login, registro, logout y sesión |
 | 5 | `feat/favorites` | Pendiente | Favoritos de usuario |
 | 6 | `feat/my-private-quotes` | Pendiente | CRUD privado de frases |
@@ -290,9 +318,14 @@ Checklist visual:
 - Sin scroll horizontal.
 - Navbar usable en móvil.
 - Footer correcto en móvil y desktop.
+- Transición suave al navegar entre rutas (fade + slide).
+- Navbar y footer NO se animan al navegar.
 - Home carga una frase real.
-- Botón "Nueva frase" funciona.
+- Botón "Sorpréndeme" activa transición suave al cambiar frase.
+- Explorador carga frases reales con filtros y búsqueda.
+- Botón "Otra frase" activa transición suave al cambiar resultados.
 - Estados de carga/error no rompen la UI.
+- Con prefers-reduced-motion activado: sin animaciones, sin saltos de layout.
 ```
 
 ## Git workflow

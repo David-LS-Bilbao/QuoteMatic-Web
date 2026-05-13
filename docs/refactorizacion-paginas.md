@@ -145,3 +145,99 @@ src/
 - Los componentes usan `Pick<UseXxxResult, ...>` en sus props para declarar solo lo que necesitan.
 - Los datos estáticos (arrays de contenido, configuración) van en archivos `content.ts` o `helpers.ts`, nunca en el componente.
 - Un componente de página no importa servicios directamente; siempre pasa por el hook.
+
+---
+
+## Patrón de transición suave entre estados de contenido
+
+Tanto `HomeQuoteSpotlight` como `ExploreResults` implementan una transición visual (fade-out + desplazamiento + blur) cuando el contenido cambia. El patrón es idéntico en ambos casos.
+
+### Cómo funciona
+
+El efecto requiere tres piezas coordinadas:
+
+**1. CSS — dos clases que definen el estado normal y el estado "saliendo"**
+
+```css
+.mi-transicion {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition: opacity var(--transition-normal), transform var(--transition-normal), filter var(--transition-normal);
+}
+
+.mi-transicion-active {
+  opacity: 0.4;
+  transform: translateY(6px) scale(0.99);
+  filter: blur(1.5px);
+}
+```
+
+**2. Hook — un delay artificial entre "datos recibidos" y "estado actualizado"**
+
+```ts
+const TRANSITION_DELAY_MS = 180
+const transitionTimeoutRef = useRef<number | null>(null)
+
+// Al inicio del useEffect, captura si hay contenido visible
+const shouldTransition = hasVisibleContentRef.current
+
+function finish(apply: () => void) {
+  if (shouldTransition) {
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      if (!isMounted) return
+      apply()           // actualiza el contenido
+      setIsTransitioning(false) // elimina la clase active → fade-in
+      transitionTimeoutRef.current = null
+    }, TRANSITION_DELAY_MS)
+  } else {
+    apply()
+    setIsTransitioning(false)
+  }
+}
+
+// Limpieza obligatoria en el return del efecto
+return () => {
+  isMounted = false
+  if (transitionTimeoutRef.current !== null) {
+    window.clearTimeout(transitionTimeoutRef.current)
+    transitionTimeoutRef.current = null
+  }
+}
+```
+
+El delay garantiza que el CSS tenga tiempo de completar el fade-out antes de que el nuevo contenido aparezca. Sin él, React actualizaría el contenido y la clase en el mismo ciclo y la animación sería imperceptible.
+
+**3. Componente — aplica la clase condicionalmente**
+
+```tsx
+<div className={isTransitioning ? 'mi-transicion mi-transicion-active' : 'mi-transicion'}>
+  {contenido}
+</div>
+```
+
+### Flujo completo
+
+```
+Usuario dispara acción
+  → isTransitioning = true   → CSS añade clase active → fade-out inicia
+  → fetch a la API
+  → respuesta llega
+  → espera TRANSITION_DELAY_MS (180ms)   ← ventana donde el fade-out se completa
+  → contenido actualizado + isTransitioning = false → CSS elimina clase active → fade-in inicia
+```
+
+La primera carga nunca activa la transición (no hay contenido previo que "salir"). El ref `hasVisibleContentRef` actúa como guardia: solo vale `true` cuando hay contenido visible en pantalla.
+
+### Archivos donde está implementado
+
+| Página | Hook | Componente | Estado | Clases CSS |
+|---|---|---|---|---|
+| HomePage | `useRandomQuote` | `HomeQuoteSpotlight` | `isQuoteTransitioning` | `.home-quote-transition[-active]` |
+| ExplorePage | `useExploreQuotes` | `ExploreResults` | `isResultsTransitioning` | `.explore-result-transition[-active]` |
+
+### Consideraciones
+
+- Incluir siempre `@media (prefers-reduced-motion: reduce)` que elimine `transform`, `filter` y `transition`, y fije `opacity: 1` en el estado active.
+- El timeout debe limpiarse en el `return` del `useEffect` para evitar updates en componentes desmontados o efectos re-ejecutados.
+- `TRANSITION_DELAY_MS` debe ser igual o ligeramente mayor que la duración de la transición CSS definida en `--transition-normal`.
