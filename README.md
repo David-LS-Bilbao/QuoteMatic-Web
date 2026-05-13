@@ -199,7 +199,8 @@ QuoteMatic-Web/
 ├── docs/
 │   ├── memoria-feat-ui-design-system.md
 │   ├── memoria-feat-home-random-quote.md
-│   └── memoria-feat-auth-session.md
+│   ├── memoria-feat-auth-session.md
+│   └── refactorizacion-estilos-css.md
 ├── public/
 ├── src/
 │   ├── app/
@@ -254,8 +255,22 @@ QuoteMatic-Web/
 │   │   ├── catalogService.ts
 │   │   └── quotesService.ts
 │   ├── styles/
-│   │   ├── components.css
-│   │   ├── global.css
+│   │   ├── base.css
+│   │   ├── features/
+│   │   │   ├── auth.css
+│   │   │   ├── explore.css
+│   │   │   ├── home.css
+│   │   │   ├── page-transition.css
+│   │   │   └── placeholders.css
+│   │   ├── index.css
+│   │   ├── layout.css
+│   │   ├── ui/
+│   │   │   ├── badge.css
+│   │   │   ├── button.css
+│   │   │   ├── empty-state.css
+│   │   │   ├── filter-control.css
+│   │   │   ├── index.css
+│   │   │   └── quote-card.css
 │   │   ├── utilities.css
 │   │   └── variables.css
 │   ├── types/
@@ -285,7 +300,7 @@ La organización real es una arquitectura React por capas y features:
 - `context` gestiona estado transversal, como autenticación.
 - `types` define contratos TypeScript de dominio y API.
 - `utils` contiene helpers puros de presentación o formato.
-- `styles` centraliza tokens, estilos globales, utilidades y componentes CSS.
+- `styles` centraliza tokens, base global, layout, utilidades, UI reutilizable y CSS específico por feature.
 
 Si se compara de forma aproximada con MVC:
 
@@ -313,7 +328,24 @@ Esta equivalencia es solo orientativa. La arquitectura del proyecto es adecuada 
 | `services` | Cliente HTTP y servicios por dominio |
 | `types` | Tipos TypeScript de API y dominio |
 | `utils` | Helpers puros y formateadores |
-| `styles` | Variables, estilos globales, utilidades y componentes |
+| `styles` | CSS por capas: tokens, base, layout, utilidades, UI y features |
+
+## Arquitectura CSS
+
+La capa CSS sigue el mismo criterio de capas y features que la arquitectura React. El punto de entrada es `src/styles/index.css`, importado desde `src/main.tsx`.
+
+| Archivo o carpeta | Responsabilidad |
+| ----------------- | --------------- |
+| `variables.css` | Tokens globales: colores, radios, sombras, layout y transiciones |
+| `base.css` | Reset base, estilos de `html`, `body`, tipografía global y foco |
+| `layout.css` | Shell de aplicación, navbar, footer y responsive de layout |
+| `utilities.css` | Utilidades compartidas como `page-section`, `eyebrow` y `page-lead` |
+| `ui/` | Estilos de componentes reutilizables: botones, badges, cards, empty states y filtros |
+| `features/` | Estilos específicos de pantallas o features: Home, Explore, Auth, placeholders y transiciones |
+
+Regla de mantenimiento: los estilos nuevos deben ir al archivo de su capa o feature. No se debe recrear un archivo grande tipo `components.css` para acumular estilos sin dueño claro.
+
+Esta organización sigue el patrón **ITCSS + Feature Folders**: ITCSS (Inverted Triangle CSS, Harry Roberts) dicta el orden de capas de menor a mayor especificidad; Feature Folders agrupa los estilos propios de cada pantalla en su carpeta dedicada. Ver `docs/refactorizacion-estilos-css.md` para más detalle.
 
 ## Design System Cosmos
 
@@ -420,4 +452,3 @@ git status
 ## Autor
 
 David López Sotelo
-
