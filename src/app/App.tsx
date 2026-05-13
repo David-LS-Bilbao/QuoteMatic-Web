@@ -3,13 +3,16 @@
 import { RouterProvider } from 'react-router'
 
 import { AuthProvider } from '../context/AuthProvider'
+import { ThemeProvider } from '../context/ThemeProvider'
 import { router } from './router'
 
 function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

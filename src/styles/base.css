@@ -11,6 +11,9 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 700ms ease,
+    color 700ms ease;
 }
 
 body {
@@ -52,7 +55,19 @@ h1 {
   outline-offset: 4px;
 }
 
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 18% 12%, rgb(124 92 252 / 12%), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgb(255 122 89 / 8%), transparent 28%),
+    radial-gradient(circle at 50% 92%, rgb(78 184 255 / 6%), transparent 34%),
+    linear-gradient(135deg, var(--color-bg), var(--color-bg-soft));
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
+
   *,
   *::before,
   *::after {

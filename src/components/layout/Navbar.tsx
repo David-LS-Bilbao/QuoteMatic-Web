@@ -1,7 +1,9 @@
-import { Compass, LogOut, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { Compass, Moon, Sparkles, Sun } from 'lucide-react'
 import { NavLink } from 'react-router'
 
 import { useAuth } from '../../hooks/useAuth'
+import { useTheme } from '../../hooks/useTheme'
+import { UserMenu } from './UserMenu'
 
 const publicNavItems = [
   { to: '/', label: 'Inicio', end: true },
@@ -11,11 +13,10 @@ const publicNavItems = [
 ]
 
 export function Navbar() {
-  const { user, isAuthenticated, isAdmin, isLoading, logout } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
-  function handleLogout() {
-    void logout()
-  }
+  const isDark = theme === 'dark'
 
   return (
     <header className="site-header">
@@ -42,77 +43,27 @@ export function Navbar() {
             {item.label}
           </NavLink>
         ))}
-
-        {isAuthenticated ? (
-          <NavLink
-            to="/favorites"
-            className={({ isActive }) =>
-              isActive ? 'nav-link nav-link-active' : 'nav-link'
-            }
-          >
-            Favoritos
-          </NavLink>
-        ) : null}
-
-
-                {isAuthenticated ? (
-          <NavLink
-            to="/my-quotes"
-            className={({ isActive }) =>
-              isActive ? 'nav-link nav-link-active' : 'nav-link'
-            }
-          >
-            Mis frases
-          </NavLink>
-        ) : null}
-
-
-        {isAuthenticated ? (
-          <NavLink
-            to="/account"
-            className={({ isActive }) =>
-              isActive ? 'nav-link nav-link-active' : 'nav-link'
-            }
-          >
-            Mi cuenta
-          </NavLink>
-        ) : null}
-
-        {isAdmin ? (
-          <NavLink
-            to="/admin/dev-panel"
-            className={({ isActive }) =>
-              isActive ? 'nav-link nav-link-active' : 'nav-link'
-            }
-          >
-            Admin
-          </NavLink>
-        ) : null}
       </nav>
 
       <div className="nav-actions">
+        <button
+          className="nav-theme-toggle"
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
+          title={isDark ? 'Modo claro' : 'Modo oscuro'}
+        >
+          {isDark ? (
+            <Sun aria-hidden="true" size={18} />
+          ) : (
+            <Moon aria-hidden="true" size={18} />
+          )}
+        </button>
+
         {isLoading ? (
           <span className="nav-user-pill">Sesión...</span>
         ) : isAuthenticated ? (
-          <>
-            <span className="nav-user-pill">
-              {isAdmin ? (
-                <ShieldCheck aria-hidden="true" size={15} />
-              ) : (
-                <UserRound aria-hidden="true" size={15} />
-              )}
-              {user?.name ?? 'Usuario'}
-            </span>
-
-            <button
-              className="nav-cta nav-cta-button"
-              type="button"
-              onClick={handleLogout}
-            >
-              <LogOut aria-hidden="true" size={16} />
-              Salir
-            </button>
-          </>
+          <UserMenu />
         ) : (
           <NavLink to="/login" className="nav-cta">
             <Compass aria-hidden="true" size={16} />

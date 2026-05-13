@@ -44,3 +44,23 @@
   --transition-fast: 160ms ease;
   --transition-normal: 240ms ease;
 }
+
+:root[data-theme='light'] {
+  --color-bg: #f0eeff;
+  --color-bg-soft: #e8e3ff;
+
+  --color-surface: #ffffff;
+  --color-surface-strong: #f5f2ff;
+  --color-surface-glass: rgb(255 255 255 / 70%);
+  --color-surface-glass-strong: rgb(255 255 255 / 88%);
+
+  --color-text: #1a1035;
+  --color-muted: #5a4a8a;
+
+  --color-border: rgb(100 80 160 / 15%);
+  --color-border-strong: rgb(100 80 160 / 28%);
+
+  --shadow-soft: 0 18px 50px rgb(80 60 140 / 10%);
+  --shadow-card: 0 24px 80px rgb(80 60 140 / 14%);
+  --shadow-glow: 0 0 44px rgb(124 92 252 / 20%);
+}
