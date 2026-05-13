@@ -38,3 +38,9 @@
   text-decoration: underline;
   transform: translateX(3px);
 }
+
+@media (max-width: 640px) {
+  .page-section {
+    padding-block: 48px;
+  }
+}
