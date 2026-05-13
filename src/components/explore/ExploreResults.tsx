@@ -1,6 +1,16 @@
-import { Bookmark, RefreshCw, Send, Share2, Sparkles } from 'lucide-react'
+import {
+  Bookmark,
+  BookmarkCheck,
+  RefreshCw,
+  Send,
+  Share2,
+  Sparkles,
+} from 'lucide-react'
+import { useNavigate } from 'react-router'
 
 import type { UseExploreQuotesResult } from '../../hooks/useExploreQuotes'
+import { useAuth } from '../../hooks/useAuth'
+import { useFavorites } from '../../hooks/useFavorites'
 import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
 import { EmptyState, QuoteCard } from '../ui'
 
@@ -28,8 +38,29 @@ export function ExploreResults({
   handleGenerateMore,
   handleClearFilters,
 }: ExploreResultsProps) {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const { isFavorite, pendingQuoteIds, toggleFavorite } = useFavorites()
+
   const mainQuote = quotes[0]
   const secondaryQuote = quotes[1]
+  const mainQuoteId = mainQuote?._id
+
+  const isMainQuoteFavorite = mainQuoteId ? isFavorite(mainQuoteId) : false
+  const isFavoritePending = mainQuoteId ? pendingQuoteIds.has(mainQuoteId) : false
+
+  function handleFavoriteClick() {
+    if (!mainQuoteId) {
+      return
+    }
+
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    void toggleFavorite(mainQuoteId)
+  }
 
   if (quotesError) {
     return (
@@ -129,7 +160,38 @@ export function ExploreResults({
           ) : null}
         </div>
 
-        <div className="explore-actions-secondary" aria-label="Acciones futuras">
+        <div className="explore-actions-secondary" aria-label="Acciones de frase">
+          <button
+            className={
+              isMainQuoteFavorite
+                ? 'ui-button ui-button-secondary ui-button-md explore-action-active'
+                : 'ui-button ui-button-secondary ui-button-md'
+            }
+            type="button"
+            onClick={handleFavoriteClick}
+            disabled={!mainQuoteId || isFavoritePending}
+            aria-pressed={isMainQuoteFavorite}
+            title={
+              isAuthenticated
+                ? 'Guardar o quitar favorito'
+                : 'Inicia sesión para guardar favoritos'
+            }
+          >
+            {isMainQuoteFavorite ? (
+              <BookmarkCheck aria-hidden="true" size={18} />
+            ) : (
+              <Bookmark aria-hidden="true" size={18} />
+            )}
+
+            {isFavoritePending
+              ? 'Guardando...'
+              : isMainQuoteFavorite
+                ? 'Guardada'
+                : 'Guardar'}
+
+            {!isAuthenticated ? <span className="action-pill">Login</span> : null}
+          </button>
+
           <button
             className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
             type="button"
@@ -139,18 +201,6 @@ export function ExploreResults({
           >
             <Share2 aria-hidden="true" size={18} />
             Compartir
-            <span className="action-pill">Pronto</span>
-          </button>
-
-          <button
-            className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
-            type="button"
-            disabled
-            title="Guardar favoritos estará disponible con autenticación"
-            aria-label="Guardar frase próximamente"
-          >
-            <Bookmark aria-hidden="true" size={18} />
-            Guardar
             <span className="action-pill">Pronto</span>
           </button>
 

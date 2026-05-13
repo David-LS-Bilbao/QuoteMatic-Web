@@ -11,6 +11,8 @@ import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { FavoritesPage } from '../pages/FavoritesPage'
+
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +43,14 @@ export const router = createBrowserRouter([
         path: 'register',
         element: <RegisterPage />,
       },
+      {
+  path: 'favorites',
+  element: (
+    <ProtectedRoute>
+      <FavoritesPage />
+    </ProtectedRoute>
+  ),
+},
       {
         path: 'account',
         element: (
