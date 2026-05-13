@@ -64,13 +64,19 @@ Ya implementado:
   - Soporte de roles: `user` y `admin`.
   - Placeholder de panel admin/dev (`/admin/dev-panel`).
   - Navbar reactiva según estado de sesión y rol.
+- Favoritos de usuario:
+  - Guardar y eliminar frases favoritas.
+  - Página protegida `/favorites`.
+  - Hook `useFavorites` y servicio `favoritesService`.
+- Mis frases privadas (CRUD completo):
+  - Crear, editar y borrar frases privadas.
+  - Página protegida `/my-quotes`.
+  - Hook `useMyQuotes` y servicio `myQuotesService`.
+  - Componentes `MyQuoteForm` y `MyQuoteCard`.
 - Documentación técnica en `docs/`.
 
 Pendiente:
 
-- Favoritos.
-- Mis frases privadas.
-- Crear, editar y borrar frases privadas.
 - Panel admin/dev funcional.
 - Modo oscuro/claro.
 - Compartir frase con Web Share API o copiar al portapapeles.
@@ -189,6 +195,8 @@ credentials: 'include'
 | `/login` | Implementada | Inicio de sesión con cookie |
 | `/register` | Implementada | Registro de usuario con `ageRange` |
 | `/account` | Implementada (protegida) | Cuenta del usuario autenticado |
+| `/favorites` | Implementada (protegida) | Favoritos del usuario autenticado |
+| `/my-quotes` | Implementada (protegida) | CRUD privado de frases del usuario |
 | `/admin/dev-panel` | Placeholder (protegida, admin) | Futuro panel admin/dev |
 | `*` | Implementada | Página 404 |
 
@@ -200,6 +208,7 @@ QuoteMatic-Web/
 │   ├── memoria-feat-ui-design-system.md
 │   ├── memoria-feat-home-random-quote.md
 │   ├── memoria-feat-auth-session.md
+│   ├── memoria-feat-my-private-quotes.md
 │   └── refactorizacion-estilos-css.md
 ├── public/
 ├── src/
@@ -225,6 +234,9 @@ QuoteMatic-Web/
 │   │   │   ├── Footer.tsx
 │   │   │   ├── Navbar.tsx
 │   │   │   └── PageTransition.tsx
+│   │   ├── my-quotes/
+│   │   │   ├── MyQuoteCard.tsx
+│   │   │   └── MyQuoteForm.tsx
 │   │   └── ui/
 │   │       ├── Badge.tsx
 │   │       ├── Button.tsx
@@ -238,6 +250,8 @@ QuoteMatic-Web/
 │   ├── hooks/
 │   │   ├── useAuth.ts
 │   │   ├── useExploreQuotes.ts
+│   │   ├── useFavorites.ts
+│   │   ├── useMyQuotes.ts
 │   │   └── useRandomQuote.ts
 │   ├── pages/
 │   │   ├── AboutPage.tsx
@@ -245,21 +259,27 @@ QuoteMatic-Web/
 │   │   ├── AdminDevPanelPage.tsx
 │   │   ├── AuthorsPage.tsx
 │   │   ├── ExplorePage.tsx
+│   │   ├── FavoritesPage.tsx
 │   │   ├── HomePage.tsx
 │   │   ├── LoginPage.tsx
+│   │   ├── MyQuotesPage.tsx
 │   │   ├── NotFoundPage.tsx
 │   │   └── RegisterPage.tsx
 │   ├── services/
 │   │   ├── apiClient.ts
 │   │   ├── authService.ts
 │   │   ├── catalogService.ts
+│   │   ├── favoritesService.ts
+│   │   ├── myQuotesService.ts
 │   │   └── quotesService.ts
 │   ├── styles/
 │   │   ├── base.css
 │   │   ├── features/
 │   │   │   ├── auth.css
 │   │   │   ├── explore.css
+│   │   │   ├── favorites.css
 │   │   │   ├── home.css
+│   │   │   ├── my-quotes.css
 │   │   │   ├── page-transition.css
 │   │   │   └── placeholders.css
 │   │   ├── index.css
@@ -278,8 +298,11 @@ QuoteMatic-Web/
 │   │   ├── apiClient.ts
 │   │   ├── auth.ts
 │   │   ├── catalog.ts
+│   │   ├── favorite.ts
+│   │   ├── myQuote.ts
 │   │   └── quote.ts
 │   ├── utils/
+│   │   ├── favoriteHelpers.ts
 │   │   └── quoteHelpers.ts
 │   └── main.tsx
 ├── .env.example
@@ -323,6 +346,7 @@ Esta equivalencia es solo orientativa. La arquitectura del proyecto es adecuada 
 | `components/home` | Secciones específicas de la Home |
 | `components/explore` | Formulario, resumen y resultados del explorador |
 | `components/auth` | Componentes relacionados con protección de rutas |
+| `components/my-quotes` | Formulario y tarjeta del CRUD privado de frases |
 | `hooks` | Estado, efectos y lógica reutilizable de UI |
 | `context` | Estado transversal compartido |
 | `services` | Cliente HTTP y servicios por dominio |
@@ -364,13 +388,14 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 
 | Requisito | Estado |
 | --------- | ------ |
-| Consumo de API | Implementado en Home con `/api/quotes/random` |
-| `useState` | Implementado en Home |
-| `useEffect` | Implementado en Home |
-| `localStorage` | Implementado en Explore para recordar filtros |
-| Mínimo 5 componentes | Cumplido |
-| Responsive | Base visual implementada |
-| TypeScript | Implementado |
+| Consumo de API | Cumplido — Home, Explore, Auth, Favorites y My Quotes |
+| `useState` | Cumplido — usado en múltiples hooks y páginas |
+| `useEffect` | Cumplido — usado en múltiples hooks y páginas |
+| `localStorage` | Cumplido — Explore persiste filtros activos |
+| Mínimo 5 componentes | Ampliamente cumplido |
+| Autenticación y rutas protegidas | Cumplido |
+| Responsive | Cumplido — mobile-first en todas las features |
+| TypeScript | Cumplido |
 | Documentación | En progreso |
 
 ## Plan de sprints
@@ -382,8 +407,8 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 2 | `feat/home-random-quote` | Completado | Home conectada a API real |
 | 3 | `feat/explore-quotes` | Completado | Explorador público con filtros |
 | 4 | `feat/auth-session` | Completado | Login, registro, logout, sesión y roles |
-| 5 | `feat/favorites` | Pendiente | Favoritos de usuario |
-| 6 | `feat/my-private-quotes` | Pendiente | CRUD privado de frases |
+| 5 | `feat/favorites` | Completado | Favoritos de usuario |
+| 6 | `feat/my-private-quotes` | Completado | CRUD privado de frases |
 | 7 | `feat/admin-dev-panel` | Pendiente | Panel admin/dev funcional |
 | 8 | `feat/theme-toggle` | Pendiente | Modo oscuro/claro |
 | 9 | `feat/share-quote` | Pendiente | Compartir/copiar frase |
@@ -403,10 +428,15 @@ Revisión manual:
 
 ```txt
 /
- /explore
- /authors
- /about
- /ruta-inexistente
+/explore
+/authors
+/about
+/login
+/register
+/account
+/favorites
+/my-quotes
+/ruta-inexistente
 ```
 
 Checklist visual:
