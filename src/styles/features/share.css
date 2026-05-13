@@ -1,0 +1,28 @@
+.ui-button.share-quote-button--shared,
+.ui-button.share-quote-button--copied {
+  color: var(--color-primary);
+  border-color: var(--color-primary-soft);
+}
+
+.ui-button.share-quote-button--error {
+  color: #e57373;
+  border-color: rgb(229 115 115 / 30%);
+}
+
+.favorite-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .favorite-item-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .favorite-item-actions .ui-button {
+    width: 100%;
+  }
+}
