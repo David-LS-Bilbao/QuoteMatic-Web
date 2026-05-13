@@ -58,8 +58,8 @@
   z-index: -1;
   border-radius: var(--radius-xl);
   background:
-    radial-gradient(circle at 30% 30%, rgb(124 92 252 / 30%), transparent 36%),
-    radial-gradient(circle at 70% 70%, rgb(255 122 89 / 18%), transparent 38%);
+    radial-gradient(circle at 30% 30%, rgb(212 136 122 / 34%), transparent 36%),
+    radial-gradient(circle at 70% 70%, rgb(160 91 76 / 22%), transparent 38%);
   filter: blur(8px);
 }
 
@@ -94,7 +94,7 @@
   border-color: var(--color-border-strong);
   box-shadow:
     var(--shadow-soft),
-    0 18px 60px rgb(124 92 252 / 14%);
+    0 18px 60px rgb(212 136 122 / 18%);
   transform: translateY(-3px);
 }
 
@@ -109,7 +109,7 @@
   background:
     radial-gradient(circle at 35% 25%, rgb(255 255 255 / 24%), transparent 32%),
     linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  box-shadow: 0 14px 36px rgb(124 92 252 / 18%);
+  box-shadow: 0 14px 36px rgb(212 136 122 / 22%);
 }
 
 .feature-card-title {
@@ -136,7 +136,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background:
-    radial-gradient(circle at 10% 10%, rgb(124 92 252 / 16%), transparent 32%),
+    radial-gradient(circle at 10% 10%, rgb(212 136 122 / 18%), transparent 32%),
     var(--color-surface-glass);
   box-shadow: var(--shadow-soft);
   -webkit-backdrop-filter: blur(var(--blur-glass));

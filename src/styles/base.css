@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+/* Transición suave al cambiar de tema */
+*, *::before, *::after {
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out, border-color 0.5s ease-in-out;
+}
+
 html {
   min-width: 320px;
   background: var(--color-bg);
@@ -11,19 +16,50 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition:
-    background-color 700ms ease,
-    color 700ms ease;
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 body {
+  isolation: isolate;
+  position: relative;
   min-height: 100vh;
   margin: 0;
+}
+
+/* Capa de fondo modo oscuro (base permanente) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(circle at 18% 12%, rgb(124 92 252 / 28%), transparent 30%),
-    radial-gradient(circle at 84% 18%, rgb(255 122 89 / 18%), transparent 28%),
-    radial-gradient(circle at 50% 92%, rgb(78 184 255 / 12%), transparent 34%),
-    linear-gradient(135deg, var(--color-bg), var(--color-bg-soft));
+    radial-gradient(circle at 18% 12%, rgb(212 136 122 / 24%), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgb(160 91 76 / 16%), transparent 28%),
+    radial-gradient(circle at 50% 92%, rgb(180 110 80 / 10%), transparent 34%),
+    linear-gradient(135deg, #120B04, #1C1208);
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Capa de fondo modo claro (se activa con opacity) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(circle at top left, #FFFFFF 0%, #FDF6EE 40%, #F5E5D8 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+:root[data-theme='light'] body::before {
+  opacity: 0;
+}
+
+:root[data-theme='light'] body::after {
+  opacity: 1;
 }
 
 button,
@@ -47,20 +83,14 @@ h1 {
 }
 
 #root {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
 }
 
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 4px;
-}
-
-:root[data-theme='light'] body {
-  background:
-    radial-gradient(circle at 18% 12%, rgb(124 92 252 / 12%), transparent 30%),
-    radial-gradient(circle at 84% 18%, rgb(255 122 89 / 8%), transparent 28%),
-    radial-gradient(circle at 50% 92%, rgb(78 184 255 / 6%), transparent 34%),
-    linear-gradient(135deg, var(--color-bg), var(--color-bg-soft));
 }
 
 @media (prefers-reduced-motion: reduce) {

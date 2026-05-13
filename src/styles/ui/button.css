@@ -39,7 +39,7 @@
 }
 
 .ui-button-primary {
-  color: var(--color-text);
+  color: #fff;
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
   box-shadow: var(--shadow-glow);
 }
@@ -47,7 +47,7 @@
 .ui-button-primary:not(:disabled):hover {
   box-shadow:
     var(--shadow-glow),
-    0 18px 50px rgb(124 92 252 / 22%);
+    0 18px 50px rgb(212 136 122 / 26%);
 }
 
 .ui-button-secondary {
