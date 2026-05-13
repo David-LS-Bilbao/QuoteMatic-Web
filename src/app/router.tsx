@@ -12,7 +12,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { FavoritesPage } from '../pages/FavoritesPage'
-
+import { MyQuotesPage } from '../pages/MyQuotesPage'
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +51,14 @@ export const router = createBrowserRouter([
     </ProtectedRoute>
   ),
 },
+    {
+      path: 'my-quotes',
+      element: (
+        <ProtectedRoute>
+          <MyQuotesPage />
+        </ProtectedRoute>
+      ),
+    },
       {
         path: 'account',
         element: (

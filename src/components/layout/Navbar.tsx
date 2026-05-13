@@ -55,6 +55,17 @@ export function Navbar() {
         ) : null}
 
 
+                {isAuthenticated ? (
+          <NavLink
+            to="/my-quotes"
+            className={({ isActive }) =>
+              isActive ? 'nav-link nav-link-active' : 'nav-link'
+            }
+          >
+            Mis frases
+          </NavLink>
+        ) : null}
+
 
         {isAuthenticated ? (
           <NavLink
