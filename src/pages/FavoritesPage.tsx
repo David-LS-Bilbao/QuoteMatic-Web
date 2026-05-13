@@ -1,5 +1,5 @@
 import { BookmarkX, Heart } from 'lucide-react'
-
+import { Link } from 'react-router' 
 import { Badge, EmptyState, QuoteCard } from '../components/ui'
 import { useFavorites } from '../hooks/useFavorites'
 import { getFavoriteQuote } from '../utils/favoriteHelpers'
@@ -58,9 +58,9 @@ export function FavoritesPage() {
           title="Todavía no tienes favoritos"
           description="Explora frases públicas y pulsa Guardar para añadirlas a esta colección."
         >
-          <a className="ui-button ui-button-primary ui-button-md" href="/explore">
+          <Link className="ui-button ui-button-primary ui-button-md" to="/explore">
             Explorar frases
-          </a>
+          </Link>
         </EmptyState>
       ) : null}
 
