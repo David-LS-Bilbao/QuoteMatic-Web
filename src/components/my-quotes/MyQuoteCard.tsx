@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import type { Quote } from '../../types/quote'
 import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
 import { QuoteCard } from '../ui'
+import { ShareQuoteButton } from '../share/ShareQuoteButton'
 
 type MyQuoteCardProps = {
   quote: Quote
@@ -35,6 +36,8 @@ export function MyQuoteCard({
           <Pencil aria-hidden="true" size={18} />
           Editar
         </button>
+
+        <ShareQuoteButton quote={quote} />
 
         <button
           className="ui-button ui-button-ghost ui-button-md my-quote-delete"

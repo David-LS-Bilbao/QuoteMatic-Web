@@ -3,7 +3,6 @@ import {
   BookmarkCheck,
   RefreshCw,
   Send,
-  Share2,
   Sparkles,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
@@ -13,6 +12,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useFavorites } from '../../hooks/useFavorites'
 import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
 import { EmptyState, QuoteCard } from '../ui'
+import { ShareQuoteButton } from '../share/ShareQuoteButton'
 
 type ExploreResultsProps = Pick<
   UseExploreQuotesResult,
@@ -192,17 +192,7 @@ export function ExploreResults({
             {!isAuthenticated ? <span className="action-pill">Login</span> : null}
           </button>
 
-          <button
-            className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
-            type="button"
-            disabled
-            title="Función de compartir preparada para una próxima versión"
-            aria-label="Compartir frase próximamente"
-          >
-            <Share2 aria-hidden="true" size={18} />
-            Compartir
-            <span className="action-pill">Pronto</span>
-          </button>
+          {mainQuote ? <ShareQuoteButton quote={mainQuote} /> : null}
 
           <button
             className="ui-button ui-button-secondary ui-button-md explore-action-disabled"

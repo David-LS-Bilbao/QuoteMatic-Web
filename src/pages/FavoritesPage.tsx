@@ -1,5 +1,6 @@
 import { BookmarkX, Heart } from 'lucide-react'
-import { Link } from 'react-router' 
+import { Link } from 'react-router'
+import { ShareQuoteButton } from '../components/share/ShareQuoteButton'
 import { Badge, EmptyState, QuoteCard } from '../components/ui'
 import { useFavorites } from '../hooks/useFavorites'
 import { getFavoriteQuote } from '../utils/favoriteHelpers'
@@ -74,15 +75,19 @@ export function FavoritesPage() {
                 meta={buildQuoteMeta(quote) || 'Frase favorita'}
               />
 
-              <button
-                className="ui-button ui-button-secondary ui-button-md favorite-remove-button"
-                type="button"
-                onClick={() => handleRemoveFavorite(quote._id)}
-                disabled={pendingQuoteIds.has(quote._id)}
-              >
-                <BookmarkX aria-hidden="true" size={18} />
-                {pendingQuoteIds.has(quote._id) ? 'Quitando...' : 'Quitar'}
-              </button>
+              <div className="favorite-item-actions">
+                <ShareQuoteButton quote={quote} />
+
+                <button
+                  className="ui-button ui-button-secondary ui-button-md"
+                  type="button"
+                  onClick={() => handleRemoveFavorite(quote._id)}
+                  disabled={pendingQuoteIds.has(quote._id)}
+                >
+                  <BookmarkX aria-hidden="true" size={18} />
+                  {pendingQuoteIds.has(quote._id) ? 'Quitando...' : 'Quitar'}
+                </button>
+              </div>
             </article>
           ))}
         </div>

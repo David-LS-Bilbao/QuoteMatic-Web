@@ -1,4 +1,4 @@
-import { Compass, Moon, Sparkles, Sun } from 'lucide-react'
+import { Compass, Moon, Sun } from 'lucide-react'
 import { NavLink } from 'react-router'
 
 import { useAuth } from '../../hooks/useAuth'
@@ -22,7 +22,7 @@ export function Navbar() {
     <header className="site-header">
       <NavLink to="/" className="brand" aria-label="QuoteMatic Web">
         <span className="brand-mark" aria-hidden="true">
-          <Sparkles size={20} />
+          <img src="/quotematic-logo.svg" width="22" height="22" alt="" />
         </span>
         <span className="brand-text">
           <strong>QuoteMatic</strong>
