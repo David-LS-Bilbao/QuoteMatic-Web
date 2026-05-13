@@ -1,11 +1,16 @@
 import { createBrowserRouter } from 'react-router'
 
+import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AboutPage } from '../pages/AboutPage'
+import { AccountPage } from '../pages/AccountPage'
+import { AdminDevPanelPage } from '../pages/AdminDevPanelPage'
 import { AuthorsPage } from '../pages/AuthorsPage'
 import { ExplorePage } from '../pages/ExplorePage'
 import { HomePage } from '../pages/HomePage'
+import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { RegisterPage } from '../pages/RegisterPage'
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +32,30 @@ export const router = createBrowserRouter([
       {
         path: 'about',
         element: <AboutPage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
+      {
+        path: 'register',
+        element: <RegisterPage />,
+      },
+      {
+        path: 'account',
+        element: (
+          <ProtectedRoute>
+            <AccountPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/dev-panel',
+        element: (
+          <ProtectedRoute requireAdmin>
+            <AdminDevPanelPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '*',
