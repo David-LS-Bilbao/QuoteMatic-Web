@@ -17,7 +17,7 @@ El backend ya existe y se mantiene como fuente única de verdad. Este repositori
 
 ## Estado actual
 
-Proyecto en fase MVP React.
+Proyecto en fase MVP React — demo list.
 
 Ya implementado:
 
@@ -25,7 +25,7 @@ Ya implementado:
 - React Router.
 - ESLint.
 - `.env.example` con URL base de API.
-- Design System visual Cosmos.
+- Design System visual Cosmos (dark + light mode).
 - Layout principal.
 - Navbar y Footer responsive con estilo glass.
 - Organización por capas y features propia de React:
@@ -43,16 +43,17 @@ Ya implementado:
   - `QuoteCard`
   - `EmptyState`
   - `FilterControl`
-- Componentes específicos para Home y Explore.
+- Componentes específicos para Home, Explore, Share y My Quotes.
 - Home visual conectada a la API real.
 - Carga de frase aleatoria pública desde `GET /api/quotes/random`.
 - Estados de carga, error y éxito en Home.
 - Explorador público de frases con filtros.
 - Búsqueda de frases.
 - Paginación ligera en Explore.
+- Filtro por autor en Explore desde URL (`?author=<id>&authorName=<name>`).
 - Persistencia de filtros con `localStorage`.
 - Cliente API base con `fetch`.
-- Servicios de frases, catálogos y autenticación.
+- Servicios de frases, catálogos, autores y autenticación.
 - Tipos TypeScript base para respuestas API, frases y autenticación.
 - Autenticación completa:
   - Login y registro conectados al backend.
@@ -73,13 +74,18 @@ Ya implementado:
   - Página protegida `/my-quotes`.
   - Hook `useMyQuotes` y servicio `myQuotesService`.
   - Componentes `MyQuoteForm` y `MyQuoteCard`.
+- Tema oscuro/claro con toggle en navbar y persistencia en `localStorage`.
+- Compartir frase con Web Share API y fallback al portapapeles.
+- Catálogo público de autores (`/authors`) con búsqueda en tiempo real.
+- Detalle de autor (`/authors/:authorId`) con tabla de frases del autor.
+- Navegación desde Authors hacia Explore filtrado por autor.
 - Documentación técnica en `docs/`.
 
 Pendiente:
 
-- Panel admin/dev funcional.
-- Modo oscuro/claro.
-- Compartir frase con Web Share API o copiar al portapapeles.
+- Panel admin/dev funcional (`/admin/dev-panel`).
+- Importación de frases mediante CSV.
+- Botones de compartir por canales específicos (WhatsApp, email, X, Facebook).
 - Deploy del frontend.
 
 ## Stack actual
@@ -148,17 +154,19 @@ Swagger:
 https://quotematic.davlos.es/api-docs/
 ```
 
-Endpoints públicos previstos/activos para el MVP React:
+Endpoints públicos activos:
 
 ```txt
 GET /api/quotes/random
 GET /api/quotes
+GET /api/quotes?author=<id>
 GET /api/authors
 GET /api/situations
 GET /api/quote-types
+GET /api/authors/:id/quotes
 ```
 
-Endpoints autenticados previstos:
+Endpoints autenticados:
 
 ```txt
 POST   /api/auth/register
@@ -189,8 +197,9 @@ credentials: 'include'
 | Ruta | Estado | Descripción |
 | ---- | ------ | ----------- |
 | `/` | Implementada | Home visual conectada a frase aleatoria real |
-| `/explore` | Implementada | Explorador público con búsqueda, filtros, paginación ligera y datos reales |
-| `/authors` | Placeholder visual | Futuro listado de autores |
+| `/explore` | Implementada | Explorador público con búsqueda, filtros, paginación y datos reales |
+| `/authors` | Implementada | Catálogo de autores con búsqueda en tiempo real |
+| `/authors/:authorId` | Implementada | Detalle de autor con tabla de frases |
 | `/about` | Implementada visualmente | Información técnica del proyecto |
 | `/login` | Implementada | Inicio de sesión con cookie |
 | `/register` | Implementada | Registro de usuario con `ageRange` |
@@ -205,11 +214,14 @@ credentials: 'include'
 ```txt
 QuoteMatic-Web/
 ├── docs/
-│   ├── memoria-feat-ui-design-system.md
-│   ├── memoria-feat-home-random-quote.md
+│   ├── informe-previo.md
 │   ├── memoria-feat-auth-session.md
+│   ├── memoria-feat-home-random-quote.md
 │   ├── memoria-feat-my-private-quotes.md
-│   └── refactorizacion-estilos-css.md
+│   ├── memoria-feat-ui-design-system.md
+│   ├── PROJECT_STATUS.md
+│   ├── refactorizacion-estilos-css.md
+│   └── refactorizacion-paginas.md
 ├── public/
 ├── src/
 │   ├── app/
@@ -233,10 +245,13 @@ QuoteMatic-Web/
 │   │   │   ├── AppLayout.tsx
 │   │   │   ├── Footer.tsx
 │   │   │   ├── Navbar.tsx
-│   │   │   └── PageTransition.tsx
+│   │   │   ├── PageTransition.tsx
+│   │   │   └── UserMenu.tsx
 │   │   ├── my-quotes/
 │   │   │   ├── MyQuoteCard.tsx
 │   │   │   └── MyQuoteForm.tsx
+│   │   ├── share/
+│   │   │   └── ShareQuoteButton.tsx
 │   │   └── ui/
 │   │       ├── Badge.tsx
 │   │       ├── Button.tsx
@@ -249,14 +264,19 @@ QuoteMatic-Web/
 │   │   └── authContext.ts
 │   ├── hooks/
 │   │   ├── useAuth.ts
+│   │   ├── useAuthorQuotes.ts
+│   │   ├── useAuthors.ts
 │   │   ├── useExploreQuotes.ts
 │   │   ├── useFavorites.ts
 │   │   ├── useMyQuotes.ts
-│   │   └── useRandomQuote.ts
+│   │   ├── useRandomQuote.ts
+│   │   ├── useShareQuote.ts
+│   │   └── useTheme.ts
 │   ├── pages/
 │   │   ├── AboutPage.tsx
 │   │   ├── AccountPage.tsx
 │   │   ├── AdminDevPanelPage.tsx
+│   │   ├── AuthorDetailPage.tsx
 │   │   ├── AuthorsPage.tsx
 │   │   ├── ExplorePage.tsx
 │   │   ├── FavoritesPage.tsx
@@ -267,6 +287,7 @@ QuoteMatic-Web/
 │   │   └── RegisterPage.tsx
 │   ├── services/
 │   │   ├── apiClient.ts
+│   │   ├── authorsService.ts
 │   │   ├── authService.ts
 │   │   ├── catalogService.ts
 │   │   ├── favoritesService.ts
@@ -276,12 +297,14 @@ QuoteMatic-Web/
 │   │   ├── base.css
 │   │   ├── features/
 │   │   │   ├── auth.css
+│   │   │   ├── authors.css
 │   │   │   ├── explore.css
 │   │   │   ├── favorites.css
 │   │   │   ├── home.css
 │   │   │   ├── my-quotes.css
 │   │   │   ├── page-transition.css
-│   │   │   └── placeholders.css
+│   │   │   ├── placeholders.css
+│   │   │   └── share.css
 │   │   ├── index.css
 │   │   ├── layout.css
 │   │   ├── ui/
@@ -347,6 +370,7 @@ Esta equivalencia es solo orientativa. La arquitectura del proyecto es adecuada 
 | `components/explore` | Formulario, resumen y resultados del explorador |
 | `components/auth` | Componentes relacionados con protección de rutas |
 | `components/my-quotes` | Formulario y tarjeta del CRUD privado de frases |
+| `components/share` | Botón de compartir frase |
 | `hooks` | Estado, efectos y lógica reutilizable de UI |
 | `context` | Estado transversal compartido |
 | `services` | Cliente HTTP y servicios por dominio |
@@ -365,7 +389,7 @@ La capa CSS sigue el mismo criterio de capas y features que la arquitectura Reac
 | `layout.css` | Shell de aplicación, navbar, footer y responsive de layout |
 | `utilities.css` | Utilidades compartidas como `page-section`, `eyebrow` y `page-lead` |
 | `ui/` | Estilos de componentes reutilizables: botones, badges, cards, empty states y filtros |
-| `features/` | Estilos específicos de pantallas o features: Home, Explore, Auth, placeholders y transiciones |
+| `features/` | Estilos específicos de pantallas o features: Home, Explore, Auth, Authors, Share, placeholders y transiciones |
 
 Regla de mantenimiento: los estilos nuevos deben ir al archivo de su capa o feature. No se debe recrear un archivo grande tipo `components.css` para acumular estilos sin dueño claro.
 
@@ -375,7 +399,7 @@ Esta organización sigue el patrón **ITCSS + Feature Folders**: ITCSS (Inverted
 
 La interfaz usa una dirección visual llamada **Cosmos**:
 
-- Tema oscuro.
+- Tema oscuro y claro con toggle en navbar.
 - Fondos con gradientes radiales.
 - Glassmorphism en navbar, footer, cards y paneles.
 - Sombras suaves.
@@ -388,15 +412,15 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 
 | Requisito | Estado |
 | --------- | ------ |
-| Consumo de API | Cumplido — Home, Explore, Auth, Favorites y My Quotes |
+| Consumo de API | Cumplido — Home, Explore, Authors, Auth, Favorites y My Quotes |
 | `useState` | Cumplido — usado en múltiples hooks y páginas |
 | `useEffect` | Cumplido — usado en múltiples hooks y páginas |
-| `localStorage` | Cumplido — Explore persiste filtros activos |
+| `localStorage` | Cumplido — Explore persiste filtros; Theme persiste preferencia |
 | Mínimo 5 componentes | Ampliamente cumplido |
 | Autenticación y rutas protegidas | Cumplido |
 | Responsive | Cumplido — mobile-first en todas las features |
 | TypeScript | Cumplido |
-| Documentación | En progreso |
+| Documentación | En curso — `docs/` con memorias técnicas de cada sprint |
 
 ## Plan de sprints
 
@@ -409,10 +433,15 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 4 | `feat/auth-session` | Completado | Login, registro, logout, sesión y roles |
 | 5 | `feat/favorites` | Completado | Favoritos de usuario |
 | 6 | `feat/my-private-quotes` | Completado | CRUD privado de frases |
-| 7 | `feat/admin-dev-panel` | Pendiente | Panel admin/dev funcional |
-| 8 | `feat/theme-toggle` | Pendiente | Modo oscuro/claro |
-| 9 | `feat/share-quote` | Pendiente | Compartir/copiar frase |
-| 10 | `chore/docs-and-demo-polish` | Pendiente | README, capturas y preparación demo |
+| 7 | `feat/theme-toggle` | Completado | Modo oscuro/claro con toggle y persistencia |
+| 8 | `feat/share-quote` | Completado | Compartir frase con Web Share API + fallback clipboard |
+| 9 | `feat/authors-catalog` | Completado | Catálogo de autores con búsqueda en tiempo real |
+| 10 | `feat/explore-by-author` | Completado | Filtro por autor en Explore desde URL (`?author=`) |
+| 11 | `feat/author-detail` | Completado | Detalle de autor con tabla de frases |
+| 12 | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
+| — | `feat/admin-dev-panel` | Pendiente | Panel admin/dev funcional |
+| — | `feat/admin-csv-import` | Pendiente | Importación de frases mediante CSV |
+| — | `feat/share-channels` | Pendiente | Botones por canal: WhatsApp, email, X, Facebook |
 
 ## QA recomendado
 
@@ -424,12 +453,14 @@ npm run build
 npm run dev
 ```
 
-Revisión manual:
+Revisión manual de rutas:
 
 ```txt
 /
 /explore
+/explore?author=<id-real>&authorName=<nombre>
 /authors
+/authors/<id-real>
 /about
 /login
 /register
@@ -448,6 +479,13 @@ Checklist visual:
 - Footer correcto en móvil y desktop.
 - Home carga una frase real.
 - Botón "Nueva frase" funciona.
+- Explore carga frases; filtros y búsqueda funcionan.
+- Authors muestra catálogo y búsqueda funciona.
+- Click en autor navega a /authors/:id con tabla de frases.
+- Share abre Web Share o copia al portapapeles.
+- Theme toggle cambia entre claro y oscuro.
+- Favorites y My Quotes accesibles solo con sesión.
+- 404 correcto en ruta inexistente.
 - Estados de carga/error no rompen la UI.
 ```
 
@@ -456,11 +494,17 @@ Checklist visual:
 Ramas principales:
 
 ```txt
-main = estable
-dev = integración
-feat/* = features
-docs/* = documentación
-chore/* = mantenimiento
+main  = estable / demo
+dev   = integración
+```
+
+Tipos de rama:
+
+```txt
+feat/*   = nuevas features
+fix/*    = correcciones de bugs
+docs/*   = documentación
+chore/*  = mantenimiento, refactoring, auditoría
 ```
 
 Flujo recomendado:
@@ -478,6 +522,8 @@ npm run lint
 npm run build
 git status
 ```
+
+PR siempre a `dev`. Solo se mergea a `main` cuando el estado es estable y demo-ready.
 
 ## Autor
 
