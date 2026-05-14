@@ -138,6 +138,11 @@ export function AdminDevPanelPage() {
                   <Users aria-hidden="true" size={19} />
                   <span>Autores</span>
                 </Link>
+
+                <Link className="admin-action-card" to="/admin/import">
+                  <FileSpreadsheet aria-hidden="true" size={19} />
+                  <span>Importar CSV</span>
+                </Link>
               </div>
             </section>
 
@@ -155,7 +160,7 @@ export function AdminDevPanelPage() {
 
                 <div className="admin-roadmap-item">
                   <span>Importación CSV</span>
-                  <strong>Pendiente</strong>
+                  <strong>Disponible</strong>
                 </div>
 
                 <div className="admin-roadmap-item">
