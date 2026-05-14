@@ -78,12 +78,12 @@ Ya implementado:
 - Compartir frase con Web Share API y fallback al portapapeles.
 - Catálogo público de autores (`/authors`) con búsqueda en tiempo real.
 - Detalle de autor (`/authors/:authorId`) con tabla de frases del autor.
+- Panel admin/dev (`/admin/dev-panel`) con estadísticas del catálogo y accesos rápidos.
+- Importación de frases en bloque desde CSV (`/admin/import`) con parseo local, validación, vista previa y reporte de resultado.
 - Documentación técnica en `docs/`.
 
 Pendiente:
 
-- Panel admin/dev funcional (`/admin/dev-panel`).
-- Importación de frases mediante CSV.
 - Botones de compartir por canales específicos (WhatsApp, email, X, Facebook).
 - Deploy del frontend.
 
@@ -94,6 +94,7 @@ Pendiente:
 - TypeScript
 - React Router
 - lucide-react
+- PapaParse (parseo CSV en cliente)
 - CSS normal
 - Fetch API
 - API REST externa
@@ -185,6 +186,12 @@ PUT    /api/me/quotes/:id
 DELETE /api/me/quotes/:id
 ```
 
+Endpoints admin (requieren sesión + rol admin):
+
+```txt
+POST /api/quotes/bulk
+```
+
 El backend usa cookies de sesión, no JWT. Las peticiones autenticadas desde React deben usar:
 
 ```ts
@@ -205,7 +212,8 @@ credentials: 'include'
 | `/account` | Implementada (protegida) | Cuenta del usuario autenticado |
 | `/favorites` | Implementada (protegida) | Favoritos del usuario autenticado |
 | `/my-quotes` | Implementada (protegida) | CRUD privado de frases del usuario |
-| `/admin/dev-panel` | Placeholder (protegida, admin) | Futuro panel admin/dev |
+| `/admin/dev-panel` | Implementada (protegida, admin) | Panel admin con estadísticas del catálogo y accesos rápidos |
+| `/admin/import` | Implementada (protegida, admin) | Importación de frases en bloque desde CSV |
 | `*` | Implementada | Página 404 |
 
 ## Arquitectura actual
@@ -214,6 +222,7 @@ credentials: 'include'
 QuoteMatic-Web/
 ├── docs/
 │   ├── informe-previo.md
+│   ├── memoria-feat-admin-csv-import.md
 │   ├── memoria-feat-auth-session.md
 │   ├── memoria-feat-home-random-quote.md
 │   ├── memoria-feat-my-private-quotes.md
@@ -262,6 +271,8 @@ QuoteMatic-Web/
 │   │   ├── AuthProvider.tsx
 │   │   └── authContext.ts
 │   ├── hooks/
+│   │   ├── useAdminCsvImport.ts
+│   │   ├── useAdminDashboard.ts
 │   │   ├── useAuth.ts
 │   │   ├── useAuthorQuotes.ts
 │   │   ├── useAuthors.ts
@@ -274,6 +285,7 @@ QuoteMatic-Web/
 │   ├── pages/
 │   │   ├── AboutPage.tsx
 │   │   ├── AccountPage.tsx
+│   │   ├── AdminCsvImportPage.tsx
 │   │   ├── AdminDevPanelPage.tsx
 │   │   ├── AuthorDetailPage.tsx
 │   │   ├── AuthorsPage.tsx
@@ -285,6 +297,7 @@ QuoteMatic-Web/
 │   │   ├── NotFoundPage.tsx
 │   │   └── RegisterPage.tsx
 │   ├── services/
+│   │   ├── adminBulkQuotesService.ts
 │   │   ├── apiClient.ts
 │   │   ├── authorsService.ts
 │   │   ├── authService.ts
@@ -295,6 +308,8 @@ QuoteMatic-Web/
 │   ├── styles/
 │   │   ├── base.css
 │   │   ├── features/
+│   │   │   ├── admin.css
+│   │   │   ├── admin-csv-import.css
 │   │   │   ├── auth.css
 │   │   │   ├── authors.css
 │   │   │   ├── explore.css
@@ -319,13 +334,15 @@ QuoteMatic-Web/
 │   │   ├── api.ts
 │   │   ├── apiClient.ts
 │   │   ├── auth.ts
+│   │   ├── author.ts
 │   │   ├── catalog.ts
 │   │   ├── favorite.ts
 │   │   ├── myQuote.ts
 │   │   └── quote.ts
 │   ├── utils/
 │   │   ├── favoriteHelpers.ts
-│   │   └── quoteHelpers.ts
+│   │   ├── quoteHelpers.ts
+│   │   └── shareQuote.ts
 │   └── main.tsx
 ├── .env.example
 ├── README.md
@@ -370,6 +387,8 @@ Esta equivalencia es solo orientativa. La arquitectura del proyecto es adecuada 
 | `components/auth` | Componentes relacionados con protección de rutas |
 | `components/my-quotes` | Formulario y tarjeta del CRUD privado de frases |
 | `components/share` | Botón de compartir frase |
+| `pages/AdminDevPanelPage` | Panel admin con estadísticas y accesos rápidos |
+| `pages/AdminCsvImportPage` | Importación de frases en bloque desde CSV |
 | `hooks` | Estado, efectos y lógica reutilizable de UI |
 | `context` | Estado transversal compartido |
 | `services` | Cliente HTTP y servicios por dominio |
@@ -411,7 +430,7 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 
 | Requisito | Estado |
 | --------- | ------ |
-| Consumo de API | Cumplido — Home, Explore, Authors, Auth, Favorites y My Quotes |
+| Consumo de API | Cumplido — Home, Explore, Authors, Auth, Favorites, My Quotes y Admin |
 | `useState` | Cumplido — usado en múltiples hooks y páginas |
 | `useEffect` | Cumplido — usado en múltiples hooks y páginas |
 | `localStorage` | Cumplido — Explore persiste filtros; Theme persiste preferencia |
@@ -436,9 +455,9 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 8 | `feat/share-quote` | Completado | Compartir frase con Web Share API + fallback clipboard |
 | 9 | `feat/authors-catalog` | Completado | Catálogo de autores con búsqueda en tiempo real |
 | 10 | `feat/author-detail` | Completado | Detalle de autor con tabla de frases |
-| 12 | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
-| — | `feat/admin-dev-panel` | Pendiente | Panel admin/dev funcional |
-| — | `feat/admin-csv-import` | Pendiente | Importación de frases mediante CSV |
+| 11 | `feat/admin-dev-panel` | Completado | Panel admin/dev con estadísticas del catálogo |
+| 12 | `feat/admin-csv-import` | Completado | Importación de frases en bloque desde CSV |
+| — | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
 | — | `feat/share-channels` | Pendiente | Botones por canal: WhatsApp, email, X, Facebook |
 
 ## QA recomendado
@@ -464,6 +483,8 @@ Revisión manual de rutas:
 /account
 /favorites
 /my-quotes
+/admin/dev-panel   (requiere sesión admin)
+/admin/import      (requiere sesión admin)
 /ruta-inexistente
 ```
 
@@ -482,6 +503,10 @@ Checklist visual:
 - Share abre Web Share o copia al portapapeles.
 - Theme toggle cambia entre claro y oscuro.
 - Favorites y My Quotes accesibles solo con sesión.
+- Admin dev-panel carga estadísticas reales del catálogo.
+- Admin import: CSV válido se parsea, previsualiza e importa.
+- Admin import: errores de validación bloquean el botón de importar.
+- /admin/dev-panel y /admin/import redirigen a login sin sesión admin.
 - 404 correcto en ruta inexistente.
 - Estados de carga/error no rompen la UI.
 ```
