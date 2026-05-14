@@ -120,11 +120,21 @@
   line-height: 1.5;
 }
 
+.auth-field option {
+  color: #FDF6EE;
+  background: #1C1208;
+}
+
 :root[data-theme='light'] .auth-field input,
 :root[data-theme='light'] .auth-field select {
   background: rgb(255 255 255 / 80%);
   border-color: var(--color-border);
   color: var(--color-text);
+}
+
+:root[data-theme='light'] .auth-field option {
+  color: #101428;
+  background: #F5EAE0;
 }
 
 :root[data-theme='light'] .auth-field input:focus,

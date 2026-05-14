@@ -87,9 +87,14 @@
 }
 
 .explore-select option {
-  color: var(--color-text);
-  background: var(--color-bg-soft);
+  color: #FDF6EE;
+  background: #1C1208;
   font-weight: 700;
+}
+
+:root[data-theme='light'] .explore-select option {
+  color: #101428;
+  background: #F5EAE0;
 }
 
 .explore-warning {
@@ -164,27 +169,63 @@
   text-transform: uppercase;
 }
 
-.explore-secondary-card {
-  width: min(100%, 760px);
-  opacity: 0.82;
+.explore-main-card .quote-card {
+  padding: 40px 44px;
+  border-color: rgb(212 136 122 / 22%);
+  background:
+    radial-gradient(ellipse at 92% 8%, rgb(212 136 122 / 14%), transparent 50%),
+    radial-gradient(ellipse at 8% 92%, rgb(124 92 252 / 8%), transparent 52%),
+    linear-gradient(160deg, rgb(255 200 160 / 9%), rgb(255 255 255 / 2%)),
+    var(--color-surface-glass);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 1px rgb(212 136 122 / 8%) inset;
 }
 
-.explore-secondary-card .quote-card {
-  padding: 22px;
-  box-shadow: var(--shadow-soft);
+.explore-main-card .quote-card:hover {
+  transform: translateY(-3px);
 }
 
-.explore-secondary-card .quote-card-text {
-  font-size: clamp(1.05rem, 2.5vw, 1.45rem);
-}
-
-.explore-secondary-title {
-  margin: 0 0 10px;
-  color: var(--color-muted);
-  font-size: 0.9rem;
+.explore-main-card .quote-card::before {
+  content: '\201C';
+  position: absolute;
+  top: 10px;
+  left: 28px;
+  font-size: 7rem;
+  line-height: 1;
   font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--color-primary);
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.explore-main-card .quote-card-text {
+  font-size: clamp(1.55rem, 4vw, 2.4rem);
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+
+.explore-main-card .quote-card-author {
+  margin-top: 28px;
+  color: var(--color-primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+:root[data-theme='light'] .explore-main-card .quote-card {
+  background:
+    radial-gradient(ellipse at 92% 8%, rgb(212 136 122 / 20%), transparent 50%),
+    radial-gradient(ellipse at 8% 92%, rgb(160 91 76 / 8%), transparent 52%),
+    linear-gradient(160deg, rgb(255 255 255 / 92%), rgb(252 249 245 / 96%));
+  border-color: rgb(212 136 122 / 32%);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 1px rgb(212 136 122 / 14%) inset;
+}
+
+:root[data-theme='light'] .explore-main-card .quote-card::before {
+  opacity: 0.08;
 }
 
 .explore-actions {

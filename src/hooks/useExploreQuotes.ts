@@ -7,7 +7,7 @@ import type { QuoteType, Situation } from '../types/catalog'
 import type { Quote } from '../types/quote'
 
 const STORAGE_KEY = 'quotematic:explore-filters'
-const PAGE_SIZE = 2
+const POOL_SIZE = 10
 const TRANSITION_DELAY_MS = 180
 
 export type ExploreFilters = {
@@ -47,6 +47,61 @@ export type UseExploreQuotesResult = {
   handleClearFilters: () => void
 }
 
+// Returns a stable key for the author of a quote.
+// Falls back to a per-quote synthetic key so anonymous quotes
+// each count as a distinct "author" for diversity tracking.
+function getAuthorKey(quote: Quote): string {
+  if (quote.authorText) return quote.authorText.toLowerCase()
+  if (typeof quote.author === 'object' && quote.author?.name) {
+    return quote.author.name.toLowerCase()
+  }
+  if (typeof quote.author === 'string') return quote.author.toLowerCase()
+  return `__unknown_author_${quote._id}`
+}
+
+// Returns a Fisher-Yates shuffled copy without mutating the original array.
+function shuffleQuotes(quotes: Quote[]): Quote[] {
+  const copy = [...quotes]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+// Picks the best next quote from a pool, avoiding seen ids/authors.
+// Priority: (1) unseen id + unseen/unknown author → (2) unseen id → (3) null (all seen)
+function pickQuote(
+  candidates: Quote[],
+  seenIds: Set<string>,
+  seenAuthors: Set<string>,
+  currentId?: string,
+): Quote | null {
+  if (candidates.length === 0) return null
+
+  // Exclude the currently displayed quote when there are alternatives
+  const available =
+    currentId && candidates.length > 1
+      ? candidates.filter((q) => q._id !== currentId)
+      : candidates
+
+  const pool = available.length > 0 ? available : candidates
+
+  // P1: unseen id + unseen author
+  const p1 = pool.filter((q) => {
+    if (seenIds.has(q._id)) return false
+    return !seenAuthors.has(getAuthorKey(q))
+  })
+  if (p1.length) return p1[Math.floor(Math.random() * p1.length)]
+
+  // P2: unseen id (author may repeat)
+  const p2 = pool.filter((q) => !seenIds.has(q._id))
+  if (p2.length) return p2[Math.floor(Math.random() * p2.length)]
+
+  // P3: all ids seen → signal exhaustion
+  return null
+}
+
 function getInitialFilters(): ExploreFilters {
   const fallback: ExploreFilters = {
     search: '',
@@ -78,7 +133,8 @@ function getInitialFilters(): ExploreFilters {
 export function useExploreQuotes(): UseExploreQuotesResult {
   const [filters, setFilters] = useState<ExploreFilters>(getInitialFilters)
   const [searchInput, setSearchInput] = useState(filters.search)
-  const [quotes, setQuotes] = useState<Quote[]>([])
+  const [pool, setPool] = useState<Quote[]>([])
+  const [displayed, setDisplayed] = useState<Quote | null>(null)
   const [situations, setSituations] = useState<Situation[]>([])
   const [quoteTypes, setQuoteTypes] = useState<QuoteType[]>([])
   const [totalPages, setTotalPages] = useState(1)
@@ -91,8 +147,11 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   const [quotesError, setQuotesError] = useState<string | null>(null)
   const [activeFilterDrawer, setActiveFilterDrawer] =
     useState<ActiveFilterDrawer>(null)
+
   const hasVisibleQuotesRef = useRef(false)
   const transitionTimeoutRef = useRef<number | null>(null)
+  const seenQuoteIdsRef = useRef<Set<string>>(new Set())
+  const seenAuthorKeysRef = useRef<Set<string>>(new Set())
 
   const hasActiveFilters = useMemo(
     () => Boolean(filters.search || filters.situation || filters.quoteType),
@@ -175,24 +234,32 @@ export function useExploreQuotes(): UseExploreQuotesResult {
       situation: filters.situation || undefined,
       quoteType: filters.quoteType || undefined,
       page: filters.page,
-      limit: PAGE_SIZE,
+      limit: POOL_SIZE,
     })
       .then((response) => {
         if (!isMounted) return
 
         finish(() => {
-          setQuotes(response.data)
+          const newPool = shuffleQuotes(response.data)
+          const selected = pickQuote(
+            newPool,
+            seenQuoteIdsRef.current,
+            seenAuthorKeysRef.current,
+          )
+          setPool(newPool)
+          setDisplayed(selected ?? newPool[0] ?? null)
           setTotalPages(response.meta.totalPages || 1)
           setTotalQuotes(response.meta.total)
           setQuotesError(null)
-          hasVisibleQuotesRef.current = response.data.length > 0
+          hasVisibleQuotesRef.current = newPool.length > 0
         })
       })
       .catch(() => {
         if (!isMounted) return
 
         finish(() => {
-          setQuotes([])
+          setPool([])
+          setDisplayed(null)
           setTotalPages(1)
           setTotalQuotes(0)
           hasVisibleQuotesRef.current = false
@@ -211,6 +278,11 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     }
   }, [filters, refreshIndex])
 
+  function resetHistory() {
+    seenQuoteIdsRef.current = new Set()
+    seenAuthorKeysRef.current = new Set()
+  }
+
   function prepareQuoteRequest() {
     setIsLoading(true)
 
@@ -219,37 +291,74 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     }
   }
 
+  // Switches to a new quote within the current pool with a CSS transition.
+  function navigateInPool(next: Quote) {
+    if (hasVisibleQuotesRef.current) {
+      setIsResultsTransitioning(true)
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        setDisplayed(next)
+        setIsResultsTransitioning(false)
+        transitionTimeoutRef.current = null
+      }, TRANSITION_DELAY_MS)
+    } else {
+      setDisplayed(next)
+      hasVisibleQuotesRef.current = true
+    }
+  }
+
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
+    resetHistory()
     prepareQuoteRequest()
     setFilters((f) => ({ ...f, search: searchInput.trim(), page: 1 }))
   }
 
   function handleSituationChange(value: string) {
+    resetHistory()
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setFilters((f) => ({ ...f, situation: value, page: 1 }))
   }
 
   function handleQuoteTypeChange(value: string) {
+    resetHistory()
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setFilters((f) => ({ ...f, quoteType: value, page: 1 }))
   }
 
   function handleGenerateMore() {
-    prepareQuoteRequest()
+    // Mark the currently displayed quote as seen
+    if (displayed) {
+      seenQuoteIdsRef.current.add(displayed._id)
+      seenAuthorKeysRef.current.add(getAuthorKey(displayed))
+    }
 
+    const next = pickQuote(
+      pool,
+      seenQuoteIdsRef.current,
+      seenAuthorKeysRef.current,
+      displayed?._id,
+    )
+
+    if (next) {
+      navigateInPool(next)
+      return
+    }
+
+    // Pool exhausted — reset only quote ids (keep author history across pools)
+    seenQuoteIdsRef.current = new Set()
+    prepareQuoteRequest()
     setFilters((f) => ({
       ...f,
-      page: f.page >= totalPages || totalPages <= 1 ? 1 : f.page + 1,
+      // Random page instead of sequential to avoid predictable page grouping
+      page: totalPages <= 1 ? 1 : Math.floor(Math.random() * totalPages) + 1,
     }))
-
     setRefreshIndex((v) => v + 1)
   }
 
   function handleClearFilters() {
+    resetHistory()
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setSearchInput('')
@@ -259,7 +368,8 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   return {
     filters,
     searchInput,
-    quotes,
+    // Expose only the displayed quote; keeps ExploreResults compatible (quotes[0])
+    quotes: displayed ? [displayed] : [],
     situations,
     quoteTypes,
     totalPages,
