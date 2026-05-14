@@ -13,6 +13,7 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { FavoritesPage } from '../pages/FavoritesPage'
 import { MyQuotesPage } from '../pages/MyQuotesPage'
+import { AuthorDetailPage } from '../pages/AuthorDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -44,13 +45,17 @@ export const router = createBrowserRouter([
         element: <RegisterPage />,
       },
       {
-  path: 'favorites',
-  element: (
-    <ProtectedRoute>
-      <FavoritesPage />
-    </ProtectedRoute>
-  ),
-},
+        path: 'favorites',
+        element: (
+          <ProtectedRoute>
+            <FavoritesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'authors/:authorId',
+        element: <AuthorDetailPage />,
+      },
     {
       path: 'my-quotes',
       element: (

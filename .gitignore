@@ -9,6 +9,8 @@ lerna-debug.log*
 
 .env
 .env.local
+.npmrc
+
 
 node_modules
 dist
@@ -27,3 +29,4 @@ dist-ssr
 *.sw?
 .claude
 
+.npmrc
