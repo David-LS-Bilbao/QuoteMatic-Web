@@ -26,3 +26,65 @@
     width: 100%;
   }
 }
+
+/* ─── Share channels ─── */
+
+.share-quote-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.share-quote-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.share-channel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  min-height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background: var(--color-surface-glass);
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.share-channel-btn:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-glass-strong);
+  transform: translateY(-1px);
+}
+
+.share-channel-letter {
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.share-quote-actions-feedback {
+  margin: 0;
+  padding: 1px 2px;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 900;
+  min-height: 1.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-channel-btn:hover {
+    transform: none;
+  }
+}
