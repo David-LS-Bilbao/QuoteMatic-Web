@@ -1,6 +1,6 @@
 import { Search, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
-
+import { Link } from 'react-router'
 import { Badge, EmptyState } from '../components/ui'
 import { useAuthors } from '../hooks/useAuthors'
 
@@ -105,28 +105,41 @@ export function AuthorsPage() {
 
       {!error && !isLoading && filtered.length > 0 ? (
         <div className="authors-grid">
+
           {filtered.map((author) => (
-            <article key={author._id} className="author-card">
-              <div className="author-card-name">{author.name}</div>
+  <Link
+    key={author._id}
+    className="author-card author-card-link"
+    to={`/authors/${author._id}`}
+  >
+    <div className="author-card-name">{author.name}</div>
 
-              {author.authorType ? (
-                <span className="author-card-type">{author.authorType}</span>
-              ) : null}
+    {author.authorType ? (
+      <span className="author-card-type">{author.authorType}</span>
+    ) : null}
 
-              {author.description ? (
-                <p className="author-card-description">{author.description}</p>
-              ) : null}
+    {author.description ? (
+      <p className="author-card-description">{author.description}</p>
+    ) : null}
 
-              {author.quoteCount !== undefined ? (
-                <div className="author-card-count">
-                  {author.quoteCount}{' '}
-                  {author.quoteCount === 1 ? 'frase' : 'frases'}
-                </div>
-              ) : null}
-            </article>
-          ))}
+    {author.quoteCount !== undefined ? (
+      <div className="author-card-count">
+        {author.quoteCount}{' '}
+        {author.quoteCount === 1 ? 'frase' : 'frases'}
+      </div>
+    ) : null}
+
+    <span className="author-card-action">Ver frases</span>
+  </Link>
+))}
         </div>
       ) : null}
     </section>
   )
 }
+/*
+Ahora la card tiene acción real.
+La URL conserva el filtro de autor.
+No usamos estado oculto ni localStorage.
+Es compatible con refresh y con compartir URL.
+*/
