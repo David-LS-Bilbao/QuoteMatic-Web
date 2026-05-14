@@ -78,7 +78,6 @@ Ya implementado:
 - Compartir frase con Web Share API y fallback al portapapeles.
 - Catálogo público de autores (`/authors`) con búsqueda en tiempo real.
 - Detalle de autor (`/authors/:authorId`) con tabla de frases del autor.
-- Navegación desde Authors hacia Explore filtrado por autor.
 - Documentación técnica en `docs/`.
 
 Pendiente:
@@ -436,8 +435,7 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 7 | `feat/theme-toggle` | Completado | Modo oscuro/claro con toggle y persistencia |
 | 8 | `feat/share-quote` | Completado | Compartir frase con Web Share API + fallback clipboard |
 | 9 | `feat/authors-catalog` | Completado | Catálogo de autores con búsqueda en tiempo real |
-| 10 | `feat/explore-by-author` | Completado | Filtro por autor en Explore desde URL (`?author=`) |
-| 11 | `feat/author-detail` | Completado | Detalle de autor con tabla de frases |
+| 10 | `feat/author-detail` | Completado | Detalle de autor con tabla de frases |
 | 12 | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
 | — | `feat/admin-dev-panel` | Pendiente | Panel admin/dev funcional |
 | — | `feat/admin-csv-import` | Pendiente | Importación de frases mediante CSV |
@@ -458,7 +456,6 @@ Revisión manual de rutas:
 ```txt
 /
 /explore
-/explore?author=<id-real>&authorName=<nombre>
 /authors
 /authors/<id-real>
 /about

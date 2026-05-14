@@ -25,7 +25,6 @@ El MVP React está completo y demo-ready. Todas las features previstas para el s
 | Theme | `feat/theme-toggle` | Toggle dark/light con persistencia en localStorage |
 | Share | `feat/share-quote` | Web Share API + fallback clipboard |
 | Authors | `feat/authors-catalog` | Catálogo de autores con búsqueda en tiempo real |
-| Explore by author | `feat/explore-by-author` | Filtro `?author=<id>` en Explore desde URL |
 | Author detail | `feat/author-detail` | `/authors/:authorId` con tabla de frases del autor |
 
 ---
@@ -47,7 +46,6 @@ El MVP React está completo y demo-ready. Todas las features previstas para el s
 | ---- | ----------- | ------- |
 | Tests | Sin tests unitarios ni de integración | Bajo — es un proyecto de bootcamp; cubierto con QA manual |
 | Skeleton loading en AuthorDetail | Estado de carga muestra solo texto plano | Visual menor |
-| `useExploreQuotes` — sync effect | El hook inicializa `author` desde URL en el `useState` initializer, dependiendo de que `PageTransition` remonte en cada navegación | Arquitectónico bajo — funciona correctamente con el router actual |
 | `AdminDevPanelPage` | Placeholder sin funcionalidad real | Protegido con rol admin — no visible para usuarios normales |
 
 ---
@@ -86,7 +84,6 @@ Sin Redux, sin Tailwind, sin librerías de componentes externas, sin mocking de 
 | `docs/PROJECT_STATUS.md` | Creado — este documento |
 | `src/styles/features/authors.css` | Bug estructural corregido: estilos de detalle de autor estaban dentro de `@media (max-width: 640px)` |
 | `src/pages/AuthorDetailPage.tsx` | `author-detail-back` para botón compacto; descripción real del autor |
-| `src/hooks/useExploreQuotes.ts` | Soporte `?author=` desde URL; `handleClearFilters` limpia URL |
 
 ---
 
@@ -96,7 +93,6 @@ Sin Redux, sin Tailwind, sin librerías de componentes externas, sin mocking de 
 
 - [ ] `/` — Home carga frase aleatoria real
 - [ ] `/explore` — Frases cargan; búsqueda y filtros funcionan
-- [ ] `/explore?author=<id>&authorName=<name>` — Filtra por autor desde URL
 - [ ] `/authors` — Catálogo de autores con búsqueda
 - [ ] `/authors/<id-real>` — Detalle de autor con tabla de frases
 - [ ] `/about` — Renderiza correctamente
