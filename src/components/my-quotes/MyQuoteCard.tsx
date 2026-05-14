@@ -3,7 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import type { Quote } from '../../types/quote'
 import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
 import { QuoteCard } from '../ui'
-import { ShareQuoteButton } from '../share/ShareQuoteButton'
+import { ShareQuoteActions } from '../share/ShareQuoteActions'
 
 type MyQuoteCardProps = {
   quote: Quote
@@ -37,7 +37,7 @@ export function MyQuoteCard({
           Editar
         </button>
 
-        <ShareQuoteButton quote={quote} />
+        <ShareQuoteActions quote={quote} />
 
         <button
           className="ui-button ui-button-ghost ui-button-md my-quote-delete"

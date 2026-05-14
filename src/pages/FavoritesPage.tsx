@@ -1,6 +1,6 @@
 import { BookmarkX, Heart } from 'lucide-react'
 import { Link } from 'react-router'
-import { ShareQuoteButton } from '../components/share/ShareQuoteButton'
+import { ShareQuoteActions } from '../components/share/ShareQuoteActions'
 import { Badge, EmptyState, QuoteCard } from '../components/ui'
 import { useFavorites } from '../hooks/useFavorites'
 import { getFavoriteQuote } from '../utils/favoriteHelpers'
@@ -76,7 +76,7 @@ export function FavoritesPage() {
               />
 
               <div className="favorite-item-actions">
-                <ShareQuoteButton quote={quote} />
+                <ShareQuoteActions quote={quote} />
 
                 <button
                   className="ui-button ui-button-secondary ui-button-md"

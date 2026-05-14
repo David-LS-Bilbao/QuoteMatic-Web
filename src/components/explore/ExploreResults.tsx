@@ -12,7 +12,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useFavorites } from '../../hooks/useFavorites'
 import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
 import { EmptyState, QuoteCard } from '../ui'
-import { ShareQuoteButton } from '../share/ShareQuoteButton'
+import { ShareQuoteActions } from '../share/ShareQuoteActions'
 
 type ExploreResultsProps = Pick<
   UseExploreQuotesResult,
@@ -192,7 +192,7 @@ export function ExploreResults({
             {!isAuthenticated ? <span className="action-pill">Login</span> : null}
           </button>
 
-          {mainQuote ? <ShareQuoteButton quote={mainQuote} /> : null}
+          {mainQuote ? <ShareQuoteActions quote={mainQuote} /> : null}
 
           <button
             className="ui-button ui-button-secondary ui-button-md explore-action-disabled"

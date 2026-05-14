@@ -76,6 +76,7 @@ Ya implementado:
   - Componentes `MyQuoteForm` y `MyQuoteCard`.
 - Tema oscuro/claro con toggle en navbar y persistencia en `localStorage`.
 - Compartir frase con Web Share API y fallback al portapapeles.
+- Canales de compartir específicos: copiar, WhatsApp, Email, X, Facebook y Discord, con feedback visual por canal.
 - Catálogo público de autores (`/authors`) con búsqueda en tiempo real.
 - Detalle de autor (`/authors/:authorId`) con tabla de frases del autor.
 - Panel admin/dev (`/admin/dev-panel`) con estadísticas del catálogo y accesos rápidos.
@@ -84,7 +85,6 @@ Ya implementado:
 
 Pendiente:
 
-- Botones de compartir por canales específicos (WhatsApp, email, X, Facebook).
 - Deploy del frontend.
 
 ## Stack actual
@@ -224,6 +224,7 @@ QuoteMatic-Web/
 │   ├── informe-previo.md
 │   ├── memoria-feat-admin-csv-import.md
 │   ├── memoria-feat-auth-session.md
+│   ├── memoria-feat-share-channels.md
 │   ├── memoria-feat-home-random-quote.md
 │   ├── memoria-feat-my-private-quotes.md
 │   ├── memoria-feat-ui-design-system.md
@@ -259,6 +260,7 @@ QuoteMatic-Web/
 │   │   │   ├── MyQuoteCard.tsx
 │   │   │   └── MyQuoteForm.tsx
 │   │   ├── share/
+│   │   │   ├── ShareQuoteActions.tsx
 │   │   │   └── ShareQuoteButton.tsx
 │   │   └── ui/
 │   │       ├── Badge.tsx
@@ -342,6 +344,7 @@ QuoteMatic-Web/
 │   ├── utils/
 │   │   ├── favoriteHelpers.ts
 │   │   ├── quoteHelpers.ts
+│   │   ├── shareChannels.ts
 │   │   └── shareQuote.ts
 │   └── main.tsx
 ├── .env.example
@@ -386,7 +389,7 @@ Esta equivalencia es solo orientativa. La arquitectura del proyecto es adecuada 
 | `components/explore` | Formulario, resumen y resultados del explorador |
 | `components/auth` | Componentes relacionados con protección de rutas |
 | `components/my-quotes` | Formulario y tarjeta del CRUD privado de frases |
-| `components/share` | Botón de compartir frase |
+| `components/share` | Botón de compartir frase (`ShareQuoteButton`) y componente multicanal (`ShareQuoteActions`) |
 | `pages/AdminDevPanelPage` | Panel admin con estadísticas y accesos rápidos |
 | `pages/AdminCsvImportPage` | Importación de frases en bloque desde CSV |
 | `hooks` | Estado, efectos y lógica reutilizable de UI |
@@ -458,7 +461,7 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 11 | `feat/admin-dev-panel` | Completado | Panel admin/dev con estadísticas del catálogo |
 | 12 | `feat/admin-csv-import` | Completado | Importación de frases en bloque desde CSV |
 | — | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
-| — | `feat/share-channels` | Pendiente | Botones por canal: WhatsApp, email, X, Facebook |
+| 13 | `feat/share-channels` | Completado | Canales de compartir: WhatsApp, Email, X, Facebook, Discord |
 
 ## QA recomendado
 
@@ -500,7 +503,8 @@ Checklist visual:
 - Explore carga frases; filtros y búsqueda funcionan.
 - Authors muestra catálogo y búsqueda funciona.
 - Click en autor navega a /authors/:id con tabla de frases.
-- Share abre Web Share o copia al portapapeles.
+- Compartir: Web Share, Copiar, WhatsApp, Email, X, Facebook y Discord funcionan.
+- Feedback visual de compartir desaparece tras 2,5 s.
 - Theme toggle cambia entre claro y oscuro.
 - Favorites y My Quotes accesibles solo con sesión.
 - Admin dev-panel carga estadísticas reales del catálogo.
