@@ -43,7 +43,6 @@ export function ExploreResults({
   const { isFavorite, pendingQuoteIds, toggleFavorite } = useFavorites()
 
   const mainQuote = quotes[0]
-  const secondaryQuote = quotes[1]
   const mainQuoteId = mainQuote?._id
 
   const isMainQuoteFavorite = mainQuoteId ? isFavorite(mainQuoteId) : false
@@ -119,7 +118,7 @@ export function ExploreResults({
       <div className="explore-main-card">
         <div className="explore-result-label">
           <Sparkles aria-hidden="true" size={18} />
-          Recomendación principal
+          Frase recomendada
         </div>
 
         <QuoteCard
@@ -128,18 +127,6 @@ export function ExploreResults({
           meta={buildQuoteMeta(mainQuote) || 'Frase pública'}
         />
       </div>
-
-      {secondaryQuote ? (
-        <aside className="explore-secondary-card">
-          <p className="explore-secondary-title">También puedes probar</p>
-
-          <QuoteCard
-            quote={secondaryQuote.text}
-            author={getAuthorName(secondaryQuote)}
-            meta={buildQuoteMeta(secondaryQuote) || 'Alternativa'}
-          />
-        </aside>
-      ) : null}
 
       <div className="explore-actions" aria-label="Acciones de la frase recomendada">
         <div className="explore-actions-primary">

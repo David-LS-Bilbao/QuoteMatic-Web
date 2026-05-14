@@ -136,6 +136,16 @@
   transform: translateX(2px);
 }
 
+:root[data-theme='light'] .filter-drawer {
+  background:
+    radial-gradient(circle at 20% 0%, rgb(212 136 122 / 12%), transparent 36%),
+    rgb(252 249 245 / 98%);
+  box-shadow:
+    var(--shadow-card),
+    0 8px 32px rgb(80 40 20 / 14%);
+  border-color: var(--color-border-strong);
+}
+
 @keyframes filter-drawer-in {
   from {
     opacity: 0;
