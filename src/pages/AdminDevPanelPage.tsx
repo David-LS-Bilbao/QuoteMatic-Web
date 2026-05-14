@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router'
 
-
+import type { ReactNode } from 'react'
 
 import { Badge, EmptyState } from '../components/ui'
 import { useAdminDashboard } from '../hooks/useAdminDashboard'
@@ -172,7 +172,7 @@ export function AdminDevPanelPage() {
 }
 
 type AdminStatCardProps = {
-  icon: React.ReactNode
+  icon: ReactNode
   label: string
   value: number | undefined
   isLoading: boolean
