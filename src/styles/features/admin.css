@@ -1,0 +1,192 @@
+.admin-page {
+  display: grid;
+  gap: 28px;
+}
+
+.admin-status-card,
+.admin-panel-card,
+.admin-stat-card {
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(circle at 20% 0%, rgb(124 92 252 / 12%), transparent 38%),
+    var(--color-surface-glass);
+  box-shadow: var(--shadow-soft);
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+}
+
+.admin-status-card {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  border-radius: var(--radius-xl);
+}
+
+.admin-status-icon,
+.admin-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.admin-status-card h2,
+.admin-panel-card h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+.admin-status-card p {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-weight: 650;
+  line-height: 1.6;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-stat-card {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: var(--radius-xl);
+}
+
+.admin-stat-card p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.admin-stat-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-text);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+}
+
+.admin-panel-card {
+  padding: 22px;
+  border-radius: var(--radius-xl);
+}
+
+.admin-panel-card-header {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-accent);
+}
+
+.admin-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-action-card {
+  min-height: 58px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  background: var(--color-surface-glass);
+  text-decoration: none;
+  font-weight: 900;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.admin-action-card:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-glass-strong);
+  transform: translateY(-2px);
+}
+
+.admin-action-card svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.admin-roadmap-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-roadmap-item {
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-glass);
+}
+
+.admin-roadmap-item span {
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.admin-roadmap-item strong {
+  color: var(--color-primary-hover);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-action-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-stats-grid,
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-status-card,
+  .admin-grid,
+  .admin-stats-grid,
+  .admin-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-status-card {
+    text-align: left;
+  }
+
+  .admin-roadmap-item {
+    flex-direction: column;
+  }
+}
