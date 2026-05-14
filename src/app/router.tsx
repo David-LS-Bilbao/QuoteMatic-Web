@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AboutPage } from '../pages/AboutPage'
 import { AccountPage } from '../pages/AccountPage'
+import { AdminCsvImportPage } from '../pages/AdminCsvImportPage'
 import { AdminDevPanelPage } from '../pages/AdminDevPanelPage'
 import { AuthorsPage } from '../pages/AuthorsPage'
 import { ExplorePage } from '../pages/ExplorePage'
@@ -77,6 +78,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requireAdmin>
             <AdminDevPanelPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/import',
+        element: (
+          <ProtectedRoute requireAdmin>
+            <AdminCsvImportPage />
           </ProtectedRoute>
         ),
       },
