@@ -143,6 +143,8 @@
 .explore-main-card {
   position: relative;
   z-index: 1;
+  padding-inline: 22px;
+  min-height: 320px;
 }
 
 .explore-main-card::before {
@@ -152,9 +154,9 @@
   z-index: -1;
   border-radius: var(--radius-xl);
   background:
-    radial-gradient(circle at 30% 30%, rgb(124 92 252 / 28%), transparent 36%),
-    radial-gradient(circle at 74% 72%, rgb(255 122 89 / 16%), transparent 38%);
-  filter: blur(8px);
+    radial-gradient(circle at 30% 30%, rgb(124 92 252 / 22%), transparent 36%),
+    radial-gradient(circle at 74% 72%, rgb(255 122 89 / 14%), transparent 38%);
+  filter: blur(10px);
 }
 
 .explore-result-label {
@@ -169,66 +171,182 @@
   text-transform: uppercase;
 }
 
+/* Pergamino moderno: fondo cálido tipo papel + textura sutil + rollos laterales */
 .explore-main-card .quote-card {
-  padding: 40px 44px;
-  border-color: rgb(212 136 122 / 22%);
+  position: relative;
+  padding: 56px 60px 52px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-color: rgb(196 138 92 / 36%);
+  border-radius: 18px;
   background:
-    radial-gradient(ellipse at 92% 8%, rgb(212 136 122 / 14%), transparent 50%),
-    radial-gradient(ellipse at 8% 92%, rgb(124 92 252 / 8%), transparent 52%),
-    linear-gradient(160deg, rgb(255 200 160 / 9%), rgb(255 255 255 / 2%)),
+    /* rollos laterales sugeridos: bandas oscuras en los laterales */
+    linear-gradient(
+      90deg,
+      rgb(120 70 30 / 22%) 0,
+      rgb(120 70 30 / 10%) 8px,
+      transparent 18px,
+      transparent calc(100% - 18px),
+      rgb(120 70 30 / 10%) calc(100% - 8px),
+      rgb(120 70 30 / 22%) 100%
+    ),
+    radial-gradient(ellipse at 12% 0%, rgb(255 235 200 / 18%), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgb(212 136 122 / 12%), transparent 60%),
+    repeating-linear-gradient(
+      135deg,
+      rgb(196 138 92 / 4%) 0px,
+      rgb(196 138 92 / 4%) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    linear-gradient(165deg, rgb(255 224 184 / 16%), rgb(228 184 132 / 8%) 60%, rgb(196 138 92 / 6%)),
     var(--color-surface-glass);
   box-shadow:
     var(--shadow-card),
-    0 0 0 1px rgb(212 136 122 / 8%) inset;
+    0 0 0 1px rgb(196 138 92 / 14%) inset,
+    0 1px 0 rgb(255 240 214 / 10%) inset,
+    0 -1px 0 rgb(120 70 30 / 14%) inset;
 }
 
 .explore-main-card .quote-card:hover {
   transform: translateY(-3px);
 }
 
+/* Comilla decorativa del pergamino */
 .explore-main-card .quote-card::before {
   content: '\201C';
   position: absolute;
-  top: 10px;
-  left: 28px;
-  font-size: 7rem;
+  top: 6px;
+  left: 32px;
+  font-size: 7.5rem;
   line-height: 1;
+  font-family: Georgia, 'Times New Roman', serif;
   font-weight: 900;
   color: var(--color-primary);
-  opacity: 0.1;
+  opacity: 0.14;
   pointer-events: none;
   user-select: none;
 }
 
+/* Borde inferior tipo papel envejecido */
+.explore-main-card .quote-card::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 14px;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(196 138 92 / 32%) 20%,
+      rgb(196 138 92 / 50%) 50%,
+      rgb(196 138 92 / 32%) 80%,
+      transparent
+    );
+  pointer-events: none;
+}
+
+/* Rollos laterales sugeridos como gradientes verticales en los lados */
+.explore-main-card .quote-card {
+  background-clip: padding-box;
+}
+
+.explore-main-card .quote-card .quote-card-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.explore-main-card .quote-card .quote-card-meta {
+  padding: 4px 12px;
+  border: 1px solid rgb(196 138 92 / 40%);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  background:
+    linear-gradient(180deg, rgb(255 235 200 / 14%), rgb(196 138 92 / 6%));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .explore-main-card .quote-card-text {
-  font-size: clamp(1.55rem, 4vw, 2.4rem);
-  line-height: 1.25;
-  letter-spacing: -0.03em;
+  position: relative;
+  z-index: 1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .explore-main-card .quote-card-author {
-  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
   color: var(--color-primary);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
+  text-align: center;
 }
 
+/* Modo claro: papel más cálido y visible */
 :root[data-theme='light'] .explore-main-card .quote-card {
   background:
-    radial-gradient(ellipse at 92% 8%, rgb(212 136 122 / 20%), transparent 50%),
-    radial-gradient(ellipse at 8% 92%, rgb(160 91 76 / 8%), transparent 52%),
-    linear-gradient(160deg, rgb(255 255 255 / 92%), rgb(252 249 245 / 96%));
-  border-color: rgb(212 136 122 / 32%);
+    linear-gradient(
+      90deg,
+      rgb(120 70 30 / 26%) 0,
+      rgb(120 70 30 / 12%) 8px,
+      transparent 18px,
+      transparent calc(100% - 18px),
+      rgb(120 70 30 / 12%) calc(100% - 8px),
+      rgb(120 70 30 / 26%) 100%
+    ),
+    radial-gradient(ellipse at 12% 0%, rgb(255 240 210 / 90%), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgb(228 184 132 / 30%), transparent 60%),
+    repeating-linear-gradient(
+      135deg,
+      rgb(160 91 76 / 5%) 0px,
+      rgb(160 91 76 / 5%) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    linear-gradient(165deg, rgb(255 245 224 / 96%), rgb(252 232 200 / 92%) 70%, rgb(244 215 174 / 88%));
+  border-color: rgb(160 91 76 / 38%);
   box-shadow:
     var(--shadow-card),
-    0 0 0 1px rgb(212 136 122 / 14%) inset;
+    0 0 0 1px rgb(160 91 76 / 18%) inset,
+    0 1px 0 rgb(255 255 255 / 55%) inset,
+    0 -1px 0 rgb(120 70 30 / 18%) inset;
 }
 
 :root[data-theme='light'] .explore-main-card .quote-card::before {
-  opacity: 0.08;
+  opacity: 0.16;
+}
+
+:root[data-theme='light'] .explore-main-card .quote-card::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(160 91 76 / 36%) 20%,
+      rgb(160 91 76 / 55%) 50%,
+      rgb(160 91 76 / 36%) 80%,
+      transparent
+    );
 }
 
 .explore-actions {
+  position: relative;
+  z-index: 5;
   margin-top: 4px;
   padding: 16px;
   display: grid;
@@ -250,6 +368,14 @@
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.explore-actions-feedback {
+  margin: 0;
+  text-align: center;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
 .explore-selection {
@@ -340,5 +466,21 @@
 
   .explore-selection {
     text-align: center;
+  }
+
+  .explore-main-card {
+    padding-inline: 6px;
+    min-height: 260px;
+  }
+
+  .explore-main-card .quote-card {
+    padding: 44px 32px 40px;
+    min-height: 240px;
+  }
+
+  .explore-main-card .quote-card::before {
+    left: 18px;
+    top: 4px;
+    font-size: 5.5rem;
   }
 }

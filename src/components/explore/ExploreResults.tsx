@@ -1,8 +1,9 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Bookmark,
   BookmarkCheck,
+  Copy,
   RefreshCw,
-  Send,
   Sparkles,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
@@ -10,7 +11,12 @@ import { useNavigate } from 'react-router'
 import type { UseExploreQuotesResult } from '../../hooks/useExploreQuotes'
 import { useAuth } from '../../hooks/useAuth'
 import { useFavorites } from '../../hooks/useFavorites'
-import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
+import {
+  buildQuoteMeta,
+  getAuthorId,
+  getAuthorName,
+} from '../../utils/quoteHelpers'
+import { buildShareText, copyText } from '../../utils/shareChannels'
 import { EmptyState, QuoteCard } from '../ui'
 import { ShareQuoteActions } from '../share/ShareQuoteActions'
 
@@ -42,6 +48,21 @@ export function ExploreResults({
   const { isAuthenticated } = useAuth()
   const { isFavorite, pendingQuoteIds, toggleFavorite } = useFavorites()
 
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current)
+    }
+  }, [])
+
+  const showCopyFeedback = useCallback((message: string) => {
+    setCopyFeedback(message)
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current)
+    copyTimerRef.current = setTimeout(() => setCopyFeedback(null), 2500)
+  }, [])
+
   const mainQuote = quotes[0]
   const mainQuoteId = mainQuote?._id
 
@@ -59,6 +80,13 @@ export function ExploreResults({
     }
 
     void toggleFavorite(mainQuoteId)
+  }
+
+  async function handleCopyClick() {
+    if (!mainQuote) return
+    const text = buildShareText(mainQuote.text, getAuthorName(mainQuote))
+    const ok = await copyText(text)
+    showCopyFeedback(ok ? 'Copiado' : 'Error al copiar')
   }
 
   if (quotesError) {
@@ -124,6 +152,11 @@ export function ExploreResults({
         <QuoteCard
           quote={mainQuote.text}
           author={getAuthorName(mainQuote)}
+          authorHref={
+            getAuthorId(mainQuote)
+              ? `/authors/${getAuthorId(mainQuote)}`
+              : undefined
+          }
           meta={buildQuoteMeta(mainQuote) || 'Frase pública'}
         />
       </div>
@@ -179,20 +212,31 @@ export function ExploreResults({
             {!isAuthenticated ? <span className="action-pill">Login</span> : null}
           </button>
 
-          {mainQuote ? <ShareQuoteActions quote={mainQuote} /> : null}
-
           <button
-            className="ui-button ui-button-secondary ui-button-md explore-action-disabled"
+            className="ui-button ui-button-secondary ui-button-md"
             type="button"
-            disabled
-            title="Enviar frase estará disponible en una próxima versión"
-            aria-label="Enviar frase próximamente"
+            onClick={() => void handleCopyClick()}
+            disabled={!mainQuote}
+            aria-label="Copiar la frase al portapapeles"
           >
-            <Send aria-hidden="true" size={18} />
-            Enviar
-            <span className="action-pill">Pronto</span>
+            <Copy aria-hidden="true" size={18} />
+            Copiar
           </button>
+
+          {mainQuote ? (
+            <ShareQuoteActions quote={mainQuote} variant="compact" />
+          ) : null}
         </div>
+
+        {copyFeedback ? (
+          <p
+            className="explore-actions-feedback"
+            role="status"
+            aria-live="polite"
+          >
+            {copyFeedback}
+          </p>
+        ) : null}
       </div>
     </div>
   )

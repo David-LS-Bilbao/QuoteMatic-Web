@@ -4,7 +4,11 @@ import { ShareQuoteActions } from '../components/share/ShareQuoteActions'
 import { Badge, EmptyState, QuoteCard } from '../components/ui'
 import { useFavorites } from '../hooks/useFavorites'
 import { getFavoriteQuote } from '../utils/favoriteHelpers'
-import { buildQuoteMeta, getAuthorName } from '../utils/quoteHelpers'
+import {
+  buildQuoteMeta,
+  getAuthorId,
+  getAuthorName,
+} from '../utils/quoteHelpers'
 
 export function FavoritesPage() {
   const {
@@ -72,6 +76,11 @@ export function FavoritesPage() {
               <QuoteCard
                 quote={quote.text}
                 author={getAuthorName(quote)}
+                authorHref={
+                  getAuthorId(quote)
+                    ? `/authors/${getAuthorId(quote)}`
+                    : undefined
+                }
                 meta={buildQuoteMeta(quote) || 'Frase favorita'}
               />
 

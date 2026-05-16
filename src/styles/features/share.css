@@ -88,3 +88,117 @@
     transform: none;
   }
 }
+
+/* ─── Send menu (compact variant) ─── */
+
+.share-quote-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.share-quote-menu-trigger {
+  position: relative;
+}
+
+.share-quote-menu-chevron {
+  transition: transform var(--transition-fast);
+}
+
+.share-quote-menu-chevron-open {
+  transform: rotate(180deg);
+}
+
+.share-quote-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 200px;
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 3%)),
+    var(--color-surface-glass);
+  box-shadow:
+    0 18px 40px rgb(0 0 0 / 32%),
+    var(--shadow-soft);
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+  animation: share-quote-menu-in 140ms ease-out;
+}
+
+@keyframes share-quote-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-quote-menu {
+    animation: none;
+  }
+
+  .share-quote-menu-chevron {
+    transition: none;
+  }
+}
+
+.share-quote-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.share-quote-menu-item:hover,
+.share-quote-menu-item:focus-visible {
+  background: var(--color-surface-glass-strong);
+  color: var(--color-primary);
+  outline: none;
+}
+
+.share-quote-menu-item:focus-visible {
+  box-shadow: 0 0 0 2px rgb(124 92 252 / 35%);
+}
+
+.share-quote-menu-feedback {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .share-quote-menu-wrapper {
+    width: 100%;
+  }
+
+  .share-quote-menu {
+    right: auto;
+    left: 0;
+    width: 100%;
+  }
+}

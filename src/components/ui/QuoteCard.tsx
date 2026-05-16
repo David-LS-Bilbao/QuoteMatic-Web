@@ -1,8 +1,11 @@
+import { Link } from 'react-router'
+
 import { Badge } from './Badge'
 
 type QuoteCardProps = {
   quote: string
   author?: string
+  authorHref?: string
   meta?: string
   /** Si es true, muestra una etiqueta que indica que la frase es temporal (datos mock). */
   isMock?: boolean
@@ -11,6 +14,7 @@ type QuoteCardProps = {
 export function QuoteCard({
   quote,
   author,
+  authorHref,
   meta,
   isMock = false,
 }: QuoteCardProps) {
@@ -23,7 +27,22 @@ export function QuoteCard({
 
       <p className="quote-card-text">"{quote}"</p>
 
-      {author ? <p className="quote-card-author">— {author}</p> : null}
+      {author ? (
+        <p className="quote-card-author">
+          —{' '}
+          {authorHref ? (
+            <Link
+              className="quote-card-author-link"
+              to={authorHref}
+              aria-label={`Ver frases de ${author}`}
+            >
+              {author}
+            </Link>
+          ) : (
+            author
+          )}
+        </p>
+      ) : null}
     </article>
   )
 }
