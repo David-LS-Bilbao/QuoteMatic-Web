@@ -21,8 +21,6 @@ type ExploreResultsProps = Pick<
   | 'isResultsTransitioning'
   | 'hasCompletedInitialLoad'
   | 'quotes'
-  | 'filters'
-  | 'totalPages'
   | 'handleGenerateMore'
   | 'handleClearFilters'
 >
@@ -33,8 +31,6 @@ export function ExploreResults({
   isResultsTransitioning,
   hasCompletedInitialLoad,
   quotes,
-  filters,
-  totalPages,
   handleGenerateMore,
   handleClearFilters,
 }: ExploreResultsProps) {
@@ -139,12 +135,6 @@ export function ExploreResults({
             <RefreshCw aria-hidden="true" size={18} />
             Otra frase
           </button>
-
-          {totalPages > 1 ? (
-            <span className="explore-selection">
-              Selección {filters.page} de {totalPages}
-            </span>
-          ) : null}
         </div>
 
         <div className="explore-actions-secondary" aria-label="Acciones de frase">

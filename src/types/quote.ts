@@ -33,3 +33,10 @@ export type QuoteFilters = {
   page?: number
   limit?: number
 }
+
+export type RandomQuoteFilters = {
+  count?: number
+  situation?: string
+  quoteType?: string
+  contentRating?: ContentRating
+}

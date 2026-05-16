@@ -42,8 +42,6 @@ export function ExplorePage() {
         isResultsTransitioning={explore.isResultsTransitioning}
         hasCompletedInitialLoad={explore.hasCompletedInitialLoad}
         quotes={explore.quotes}
-        filters={explore.filters}
-        totalPages={explore.totalPages}
         handleGenerateMore={explore.handleGenerateMore}
         handleClearFilters={explore.handleClearFilters}
       />

@@ -2,12 +2,12 @@ import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getQuoteTypes, getSituations } from '../services/catalogService'
-import { getQuotes } from '../services/quotesService'
+import { getQuotes, getRandomQuotesPool } from '../services/quotesService'
 import type { QuoteType, Situation } from '../types/catalog'
 import type { Quote } from '../types/quote'
 
 const STORAGE_KEY = 'quotematic:explore-filters'
-const POOL_SIZE = 10
+const POOL_SIZE = 20
 const TRANSITION_DELAY_MS = 180
 
 export type ExploreFilters = {
@@ -69,12 +69,16 @@ function shuffleQuotes(quotes: Quote[]): Quote[] {
   return copy
 }
 
-// Picks the best next quote from a pool, avoiding seen ids/authors.
-// Priority: (1) unseen id + unseen/unknown author → (2) unseen id → (3) null (all seen)
+// Picks the best next quote from a pool, applying the following cascade:
+//   P1: unseen id + unseen author + author != lastAuthorKey
+//   P2: unseen id + author != lastAuthorKey
+//   P3: unseen id (author may repeat the last one)
+//   null: every id in the pool has been seen → caller should reset / refetch
 function pickQuote(
   candidates: Quote[],
   seenIds: Set<string>,
   seenAuthors: Set<string>,
+  lastAuthorKey: string | null,
   currentId?: string,
 ): Quote | null {
   if (candidates.length === 0) return null
@@ -87,18 +91,29 @@ function pickQuote(
 
   const pool = available.length > 0 ? available : candidates
 
-  // P1: unseen id + unseen author
-  const p1 = pool.filter((q) => {
-    if (seenIds.has(q._id)) return false
-    return !seenAuthors.has(getAuthorKey(q))
-  })
+  const isDifferentFromLastAuthor = (q: Quote) =>
+    lastAuthorKey === null || getAuthorKey(q) !== lastAuthorKey
+
+  // P1: unseen id + unseen author + distinct from last author
+  const p1 = pool.filter(
+    (q) =>
+      !seenIds.has(q._id) &&
+      !seenAuthors.has(getAuthorKey(q)) &&
+      isDifferentFromLastAuthor(q),
+  )
   if (p1.length) return p1[Math.floor(Math.random() * p1.length)]
 
-  // P2: unseen id (author may repeat)
-  const p2 = pool.filter((q) => !seenIds.has(q._id))
+  // P2: unseen id + distinct from last author
+  const p2 = pool.filter(
+    (q) => !seenIds.has(q._id) && isDifferentFromLastAuthor(q),
+  )
   if (p2.length) return p2[Math.floor(Math.random() * p2.length)]
 
-  // P3: all ids seen → signal exhaustion
+  // P3: unseen id (the same author as last is accepted as last resort)
+  const p3 = pool.filter((q) => !seenIds.has(q._id))
+  if (p3.length) return p3[Math.floor(Math.random() * p3.length)]
+
+  // All ids seen → caller handles P4 (reset seenIds and/or refetch)
   return null
 }
 
@@ -152,6 +167,12 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   const transitionTimeoutRef = useRef<number | null>(null)
   const seenQuoteIdsRef = useRef<Set<string>>(new Set())
   const seenAuthorKeysRef = useRef<Set<string>>(new Set())
+  // Tracks the author of the quote currently being shown so we can avoid
+  // showing two quotes from the same author in a row.
+  const lastAuthorKeyRef = useRef<string | null>(null)
+  // Guards against infinite refetch loops when no different-author candidate
+  // can be found locally: at most one fallback refetch per user click.
+  const hasRefetchedForDiversityRef = useRef(false)
 
   const hasActiveFilters = useMemo(
     () => Boolean(filters.search || filters.situation || filters.quoteType),
@@ -229,13 +250,38 @@ export function useExploreQuotes(): UseExploreQuotesResult {
       }
     }
 
-    getQuotes({
-      search: filters.search || undefined,
-      situation: filters.situation || undefined,
-      quoteType: filters.quoteType || undefined,
-      page: filters.page,
-      limit: POOL_SIZE,
-    })
+    const trimmedSearch = filters.search.trim()
+    const isSearchMode = trimmedSearch.length > 0
+
+    // Random pool uses backend-side randomness; search keeps the deterministic
+    // paginated endpoint because /api/quotes/random does not accept `search`.
+    const fetchPool: Promise<{
+      data: Quote[]
+      total: number
+      totalPages: number
+    }> = isSearchMode
+      ? getQuotes({
+          search: trimmedSearch,
+          situation: filters.situation || undefined,
+          quoteType: filters.quoteType || undefined,
+          page: filters.page,
+          limit: POOL_SIZE,
+        }).then((response) => ({
+          data: response.data,
+          total: response.meta.total,
+          totalPages: response.meta.totalPages || 1,
+        }))
+      : getRandomQuotesPool({
+          count: POOL_SIZE,
+          situation: filters.situation || undefined,
+          quoteType: filters.quoteType || undefined,
+        }).then((response) => ({
+          data: response.data,
+          total: response.meta.returned,
+          totalPages: 1,
+        }))
+
+    fetchPool
       .then((response) => {
         if (!isMounted) return
 
@@ -245,11 +291,25 @@ export function useExploreQuotes(): UseExploreQuotesResult {
             newPool,
             seenQuoteIdsRef.current,
             seenAuthorKeysRef.current,
+            lastAuthorKeyRef.current,
           )
+          const chosen = selected ?? newPool[0] ?? null
           setPool(newPool)
-          setDisplayed(selected ?? newPool[0] ?? null)
-          setTotalPages(response.meta.totalPages || 1)
-          setTotalQuotes(response.meta.total)
+          setDisplayed(chosen)
+          if (chosen) {
+            const newKey = getAuthorKey(chosen)
+            // If the freshly chosen quote moves us off the previous author,
+            // forget that we already refetched for diversity in this cycle.
+            if (
+              lastAuthorKeyRef.current !== null &&
+              lastAuthorKeyRef.current !== newKey
+            ) {
+              hasRefetchedForDiversityRef.current = false
+            }
+            lastAuthorKeyRef.current = newKey
+          }
+          setTotalPages(response.totalPages)
+          setTotalQuotes(response.total)
           setQuotesError(null)
           hasVisibleQuotesRef.current = newPool.length > 0
         })
@@ -281,6 +341,8 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   function resetHistory() {
     seenQuoteIdsRef.current = new Set()
     seenAuthorKeysRef.current = new Set()
+    lastAuthorKeyRef.current = null
+    hasRefetchedForDiversityRef.current = false
   }
 
   function prepareQuoteRequest() {
@@ -334,27 +396,88 @@ export function useExploreQuotes(): UseExploreQuotesResult {
       seenAuthorKeysRef.current.add(getAuthorKey(displayed))
     }
 
+    const lastAuthor = lastAuthorKeyRef.current
+    const currentId = displayed?._id
+
+    // Rule 8: if the current local pool has no author distinct from the last
+    // shown one, ask the backend for a new pool before allowing repetition.
+    // Capped to a single defensive refetch per click (rule 9).
+    const poolHasDifferentAuthor =
+      lastAuthor === null || pool.some((q) => getAuthorKey(q) !== lastAuthor)
+
+    if (
+      !poolHasDifferentAuthor &&
+      !hasRefetchedForDiversityRef.current &&
+      pool.length > 0
+    ) {
+      hasRefetchedForDiversityRef.current = true
+      prepareQuoteRequest()
+
+      const isSearchMode = filters.search.trim().length > 0
+      if (isSearchMode && totalPages > 1) {
+        setFilters((f) => ({
+          ...f,
+          page: Math.floor(Math.random() * totalPages) + 1,
+        }))
+      } else {
+        setRefreshIndex((v) => v + 1)
+      }
+      return
+    }
+
+    // Normal cascade P1 → P2 → P3
     const next = pickQuote(
       pool,
       seenQuoteIdsRef.current,
       seenAuthorKeysRef.current,
-      displayed?._id,
+      lastAuthor,
+      currentId,
     )
 
     if (next) {
+      const newKey = getAuthorKey(next)
+      if (lastAuthor !== null && newKey !== lastAuthor) {
+        hasRefetchedForDiversityRef.current = false
+      }
+      lastAuthorKeyRef.current = newKey
       navigateInPool(next)
       return
     }
 
-    // Pool exhausted — reset only quote ids (keep author history across pools)
+    // P4: every id in the local pool is already seen → reset seenIds (keep
+    // seenAuthors / lastAuthor) and retry with the diversity rules still on.
     seenQuoteIdsRef.current = new Set()
+    const retried = pickQuote(
+      pool,
+      seenQuoteIdsRef.current,
+      seenAuthorKeysRef.current,
+      lastAuthor,
+      currentId,
+    )
+    if (retried) {
+      const newKey = getAuthorKey(retried)
+      if (lastAuthor !== null && newKey !== lastAuthor) {
+        hasRefetchedForDiversityRef.current = false
+      }
+      lastAuthorKeyRef.current = newKey
+      navigateInPool(retried)
+      return
+    }
+
+    // Local pool truly cannot help → ask backend for a fresh pool.
     prepareQuoteRequest()
-    setFilters((f) => ({
-      ...f,
-      // Random page instead of sequential to avoid predictable page grouping
-      page: totalPages <= 1 ? 1 : Math.floor(Math.random() * totalPages) + 1,
-    }))
-    setRefreshIndex((v) => v + 1)
+
+    const isSearchMode = filters.search.trim().length > 0
+    if (isSearchMode && totalPages > 1) {
+      // Search keeps deterministic pagination, so jump to a random page.
+      setFilters((f) => ({
+        ...f,
+        page: Math.floor(Math.random() * totalPages) + 1,
+      }))
+    } else {
+      // Random mode just refetches; backend will return a new random pool.
+      setRefreshIndex((v) => v + 1)
+    }
   }
 
   function handleClearFilters() {
