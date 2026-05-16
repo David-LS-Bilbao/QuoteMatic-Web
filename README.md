@@ -17,7 +17,7 @@ El backend ya existe y se mantiene como fuente única de verdad. Este repositori
 
 ## Estado actual
 
-Proyecto en fase MVP React — demo list.
+Proyecto en fase MVP React avanzado, listo para revisión de PR hacia `dev` tras QA manual.
 
 Ya implementado:
 
@@ -47,10 +47,12 @@ Ya implementado:
 - Home visual conectada a la API real.
 - Carga de frase aleatoria pública desde `GET /api/quotes/random`.
 - Estados de carga, error y éxito en Home.
-- Explorador público de frases con filtros.
+- Explorador público de frases con filtros y panel protagonista tipo pergamino.
 - Búsqueda de frases.
 - Paginación ligera en Explore.
 - Filtro por autor en Explore desde URL (`?author=<id>&authorName=<name>`).
+- Carga directa de frase concreta en Explore desde URL (`/explore?quote=<id>`).
+- Botón "Otra frase" en Explore con selección aleatoria desde pool de resultados.
 - Persistencia de filtros con `localStorage`.
 - Cliente API base con `fetch`.
 - Servicios de frases, catálogos, autores y autenticación.
@@ -76,9 +78,13 @@ Ya implementado:
   - Componentes `MyQuoteForm` y `MyQuoteCard`.
 - Tema oscuro/claro con toggle en navbar y persistencia en `localStorage`.
 - Compartir frase con Web Share API y fallback al portapapeles.
-- Canales de compartir específicos: copiar, WhatsApp, Email, X, Facebook y Discord, con feedback visual por canal.
+- Menú "Enviar" en Explore con WhatsApp, Email, X, Facebook, Discord y compartir nativo.
+- Canales de compartir específicos en vistas de colección: copiar, WhatsApp, Email, X, Facebook y Discord, con feedback visual por canal.
 - Catálogo público de autores (`/authors`) con búsqueda en tiempo real.
 - Detalle de autor (`/authors/:authorId`) con tabla de frases del autor.
+- Autor clicable desde `QuoteCard` cuando existe `authorHref`.
+- Desde detalle de autor, cada frase puede abrirse en `/explore?quote=<id>`.
+- Caché simple en `useAuthors` para acelerar la vuelta al catálogo.
 - Panel admin/dev (`/admin/dev-panel`) con estadísticas del catálogo y accesos rápidos.
 - Importación de frases en bloque desde CSV (`/admin/import`) con parseo local, validación, vista previa y reporte de resultado.
 - Documentación técnica en `docs/`.
@@ -204,6 +210,7 @@ credentials: 'include'
 | ---- | ------ | ----------- |
 | `/` | Implementada | Home visual conectada a frase aleatoria real |
 | `/explore` | Implementada | Explorador público con búsqueda, filtros, paginación y datos reales |
+| `/explore?quote=<id>` | Implementada | Abre una frase pública concreta en el panel protagonista |
 | `/authors` | Implementada | Catálogo de autores con búsqueda en tiempo real |
 | `/authors/:authorId` | Implementada | Detalle de autor con tabla de frases |
 | `/about` | Implementada visualmente | Información técnica del proyecto |
@@ -214,6 +221,7 @@ credentials: 'include'
 | `/my-quotes` | Implementada (protegida) | CRUD privado de frases del usuario |
 | `/admin/dev-panel` | Implementada (protegida, admin) | Panel admin con estadísticas del catálogo y accesos rápidos |
 | `/admin/import` | Implementada (protegida, admin) | Importación de frases en bloque desde CSV |
+| `/admin` | No definida | La administración vive en rutas específicas protegidas |
 | `*` | Implementada | Página 404 |
 
 ## Arquitectura actual
@@ -460,8 +468,9 @@ La interfaz usa una dirección visual llamada **Cosmos**:
 | 10 | `feat/author-detail` | Completado | Detalle de autor con tabla de frases |
 | 11 | `feat/admin-dev-panel` | Completado | Panel admin/dev con estadísticas del catálogo |
 | 12 | `feat/admin-csv-import` | Completado | Importación de frases en bloque desde CSV |
-| — | `chore/final-demo-audit` | En curso | Auditoría final, README y docs actualizados |
 | 13 | `feat/share-channels` | Completado | Canales de compartir: WhatsApp, Email, X, Facebook, Discord |
+| 14 | `feat/explore-scroll-quote-ui` | En revisión | Rediseño de Explore, autor clicable, `?quote=<id>` y menú Enviar compacto |
+| — | `chore/final-demo-audit` | Referencia previa | Auditoría final, README y docs actualizados |
 
 ## QA recomendado
 
@@ -478,6 +487,7 @@ Revisión manual de rutas:
 ```txt
 /
 /explore
+/explore?quote=<id-real>
 /authors
 /authors/<id-real>
 /about
@@ -501,8 +511,10 @@ Checklist visual:
 - Home carga una frase real.
 - Botón "Nueva frase" funciona.
 - Explore carga frases; filtros y búsqueda funcionan.
+- /explore?quote=<id> abre una frase concreta y "Otra frase" limpia la URL.
 - Authors muestra catálogo y búsqueda funciona.
 - Click en autor navega a /authors/:id con tabla de frases.
+- Click en frase desde /authors/:id navega a /explore?quote=<id>.
 - Compartir: Web Share, Copiar, WhatsApp, Email, X, Facebook y Discord funcionan.
 - Feedback visual de compartir desaparece tras 2,5 s.
 - Theme toggle cambia entre claro y oscuro.
