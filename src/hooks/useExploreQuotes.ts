@@ -1,14 +1,16 @@
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router'
 
 import { getQuoteTypes, getSituations } from '../services/catalogService'
-import { getQuotes } from '../services/quotesService'
+import { getQuoteById, getQuotes } from '../services/quotesService'
 import type { QuoteType, Situation } from '../types/catalog'
 import type { Quote } from '../types/quote'
 
 const STORAGE_KEY = 'quotematic:explore-filters'
 const POOL_SIZE = 10
 const TRANSITION_DELAY_MS = 180
+const QUOTE_QUERY_PARAM = 'quote'
 
 export type ExploreFilters = {
   search: string
@@ -147,11 +149,25 @@ export function useExploreQuotes(): UseExploreQuotesResult {
   const [quotesError, setQuotesError] = useState<string | null>(null)
   const [activeFilterDrawer, setActiveFilterDrawer] =
     useState<ActiveFilterDrawer>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedQuoteId = searchParams.get(QUOTE_QUERY_PARAM) ?? ''
 
   const hasVisibleQuotesRef = useRef(false)
   const transitionTimeoutRef = useRef<number | null>(null)
   const seenQuoteIdsRef = useRef<Set<string>>(new Set())
   const seenAuthorKeysRef = useRef<Set<string>>(new Set())
+
+  const clearQuoteParam = useCallback(() => {
+    setSearchParams(
+      (current) => {
+        if (!current.has(QUOTE_QUERY_PARAM)) return current
+        const next = new URLSearchParams(current)
+        next.delete(QUOTE_QUERY_PARAM)
+        return next
+      },
+      { replace: true },
+    )
+  }, [setSearchParams])
 
   const hasActiveFilters = useMemo(
     () => Boolean(filters.search || filters.situation || filters.quoteType),
@@ -229,6 +245,41 @@ export function useExploreQuotes(): UseExploreQuotesResult {
       }
     }
 
+    // Mode A — frase concreta seleccionada via ?quote=<id> (típicamente desde /authors).
+    if (selectedQuoteId) {
+      getQuoteById(selectedQuoteId)
+        .then((response) => {
+          if (!isMounted) return
+
+          finish(() => {
+            const quote = response.data
+            setPool([])
+            setDisplayed(quote)
+            seenQuoteIdsRef.current.add(quote._id)
+            seenAuthorKeysRef.current.add(getAuthorKey(quote))
+            setTotalPages(1)
+            setTotalQuotes(1)
+            setQuotesError(null)
+            hasVisibleQuotesRef.current = true
+          })
+        })
+        .catch(() => {
+          if (!isMounted) return
+          // Fallback seguro: si la frase no carga, limpiamos el param y el
+          // effect volverá a ejecutarse en Mode B (pool aleatorio).
+          clearQuoteParam()
+        })
+
+      return () => {
+        isMounted = false
+        if (transitionTimeoutRef.current !== null) {
+          window.clearTimeout(transitionTimeoutRef.current)
+          transitionTimeoutRef.current = null
+        }
+      }
+    }
+
+    // Mode B — pool normal con filtros.
     getQuotes({
       search: filters.search || undefined,
       situation: filters.situation || undefined,
@@ -276,7 +327,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
         transitionTimeoutRef.current = null
       }
     }
-  }, [filters, refreshIndex])
+  }, [filters, refreshIndex, selectedQuoteId, clearQuoteParam])
 
   function resetHistory() {
     seenQuoteIdsRef.current = new Set()
@@ -310,6 +361,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     event.preventDefault()
     resetHistory()
     prepareQuoteRequest()
+    clearQuoteParam()
     setFilters((f) => ({ ...f, search: searchInput.trim(), page: 1 }))
   }
 
@@ -317,6 +369,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     resetHistory()
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
+    clearQuoteParam()
     setFilters((f) => ({ ...f, situation: value, page: 1 }))
   }
 
@@ -324,6 +377,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     resetHistory()
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
+    clearQuoteParam()
     setFilters((f) => ({ ...f, quoteType: value, page: 1 }))
   }
 
@@ -332,6 +386,15 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     if (displayed) {
       seenQuoteIdsRef.current.add(displayed._id)
       seenAuthorKeysRef.current.add(getAuthorKey(displayed))
+    }
+
+    // En modo "frase concreta" (?quote=<id>), Otra frase quita el param para
+    // que el effect re-corra en Mode B y elija una aleatoria respetando la
+    // historia recién marcada.
+    if (selectedQuoteId) {
+      prepareQuoteRequest()
+      clearQuoteParam()
+      return
     }
 
     const next = pickQuote(
@@ -362,6 +425,7 @@ export function useExploreQuotes(): UseExploreQuotesResult {
     prepareQuoteRequest()
     setActiveFilterDrawer(null)
     setSearchInput('')
+    clearQuoteParam()
     setFilters({ search: '', situation: '', quoteType: '', page: 1 })
   }
 

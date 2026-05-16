@@ -16,6 +16,14 @@ export function getAuthorName(quote: Quote): string {
   return 'Autor desconocido'
 }
 
+export function getAuthorId(quote: Quote): string | undefined {
+  if (typeof quote.author === 'object' && quote.author?._id) {
+    return quote.author._id
+  }
+
+  return undefined
+}
+
 export function getCategoryName(
   value: Quote['situation'] | Quote['quoteType'],
 ): string | undefined {

@@ -10,17 +10,24 @@ export type UseAuthorsResult = {
   retry: () => void
 }
 
+// Caché en memoria a nivel de módulo: evita refetch al volver a /authors.
+let cachedAuthors: Author[] | null = null
+let inFlight: Promise<Author[]> | null = null
+
 export function useAuthors(): UseAuthorsResult {
-  const [authors, setAuthors] = useState<Author[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [authors, setAuthors] = useState<Author[]>(() => cachedAuthors ?? [])
+  const [isLoading, setIsLoading] = useState(() => cachedAuthors === null)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     let isMounted = true
 
-    getAuthors()
+    const request = inFlight ?? (inFlight = getAuthors())
+
+    request
       .then((data) => {
+        cachedAuthors = data
         if (!isMounted) return
         setAuthors(data)
         setError(null)
@@ -28,11 +35,18 @@ export function useAuthors(): UseAuthorsResult {
       })
       .catch(() => {
         if (!isMounted) return
-        setAuthors([])
+        if (cachedAuthors === null) {
+          setAuthors([])
+        }
         setError(
           'No hemos podido cargar los autores. Revisa la conexión e inténtalo de nuevo.',
         )
         setIsLoading(false)
+      })
+      .finally(() => {
+        if (inFlight === request) {
+          inFlight = null
+        }
       })
 
     return () => {
@@ -41,6 +55,8 @@ export function useAuthors(): UseAuthorsResult {
   }, [retryCount])
 
   const retry = useCallback(() => {
+    cachedAuthors = null
+    inFlight = null
     setIsLoading(true)
     setError(null)
     setRetryCount((c) => c + 1)
