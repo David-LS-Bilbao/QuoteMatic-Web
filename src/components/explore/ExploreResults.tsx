@@ -10,7 +10,11 @@ import { useNavigate } from 'react-router'
 import type { UseExploreQuotesResult } from '../../hooks/useExploreQuotes'
 import { useAuth } from '../../hooks/useAuth'
 import { useFavorites } from '../../hooks/useFavorites'
-import { buildQuoteMeta, getAuthorName } from '../../utils/quoteHelpers'
+import {
+  buildQuoteMeta,
+  getAuthorId,
+  getAuthorName,
+} from '../../utils/quoteHelpers'
 import { EmptyState, QuoteCard } from '../ui'
 import { ShareQuoteActions } from '../share/ShareQuoteActions'
 
@@ -124,6 +128,11 @@ export function ExploreResults({
         <QuoteCard
           quote={mainQuote.text}
           author={getAuthorName(mainQuote)}
+          authorHref={
+            getAuthorId(mainQuote)
+              ? `/authors/${getAuthorId(mainQuote)}`
+              : undefined
+          }
           meta={buildQuoteMeta(mainQuote) || 'Frase pública'}
         />
       </div>

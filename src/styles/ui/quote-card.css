@@ -55,6 +55,37 @@
   font-weight: 700;
 }
 
+.quote-card-author-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  margin: 0 -4px;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    text-decoration-color var(--transition-fast);
+}
+
+.quote-card-author-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+}
+
+.quote-card-author-link:focus-visible {
+  outline: 2px solid rgb(124 92 252 / 55%);
+  outline-offset: 2px;
+  color: var(--color-primary-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-card-author-link {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .quote-card:hover {
     transform: none;
