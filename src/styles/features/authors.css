@@ -276,6 +276,60 @@
   line-height: 1.5;
 }
 
+.author-quote-link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  margin: -6px -8px;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.author-quote-link:hover,
+.author-quote-link:focus-visible {
+  background: var(--color-surface-glass-strong);
+  color: var(--color-primary);
+  outline: none;
+}
+
+.author-quote-link-text {
+  display: block;
+}
+
+.author-quote-link-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.author-quote-link:hover .author-quote-link-hint,
+.author-quote-link:focus-visible .author-quote-link-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .author-quote-link-hint {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* ─── Author detail – responsive ─── */
 
 @media (max-width: 640px) {

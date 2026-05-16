@@ -1,4 +1,4 @@
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Sparkles } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 
 import { Badge, EmptyState } from '../components/ui'
@@ -113,7 +113,24 @@ export function AuthorDetailPage() {
               <tbody>
                 {quotes.map((quote) => (
                   <tr key={quote._id}>
-                    <td className="author-quote-text">{quote.text}</td>
+                    <td className="author-quote-text">
+                      <Link
+                        className="author-quote-link"
+                        to={`/explore?quote=${encodeURIComponent(quote._id)}`}
+                        title="Abrir esta frase en Explore"
+                      >
+                        <span className="author-quote-link-text">
+                          {quote.text}
+                        </span>
+                        <span
+                          className="author-quote-link-hint"
+                          aria-hidden="true"
+                        >
+                          <Sparkles size={14} />
+                          Abrir en Explore
+                        </span>
+                      </Link>
+                    </td>
                     <td>{buildQuoteMeta(quote) || 'Sin clasificación'}</td>
                     <td>{quote.contentRating ?? '—'}</td>
                     <td>{quote.language ?? '—'}</td>
