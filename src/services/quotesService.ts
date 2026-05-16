@@ -1,9 +1,19 @@
 import { apiClient } from './apiClient'
-import type { ApiPaginatedResponse, ApiSuccessResponse } from '../types/api'
-import type { Quote, QuoteFilters } from '../types/quote'
+import type {
+  ApiPaginatedResponse,
+  ApiRandomPoolResponse,
+  ApiSuccessResponse,
+} from '../types/api'
+import type { Quote, QuoteFilters, RandomQuoteFilters } from '../types/quote'
 
 export function getRandomQuote(filters?: QuoteFilters) {
   return apiClient<ApiSuccessResponse<Quote>>('/api/quotes/random', {
+    query: filters,
+  })
+}
+
+export function getRandomQuotesPool(filters?: RandomQuoteFilters) {
+  return apiClient<ApiRandomPoolResponse<Quote>>('/api/quotes/random', {
     query: filters,
   })
 }

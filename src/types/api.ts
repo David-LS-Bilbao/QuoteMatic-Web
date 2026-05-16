@@ -14,6 +14,15 @@ export type ApiPaginatedResponse<T> = {
   }
 }
 
+export type ApiRandomPoolResponse<T> = {
+  success: true
+  data: T[]
+  meta: {
+    count: number
+    returned: number
+  }
+}
+
 export type ApiErrorResponse = {
   success?: false
   message?: string
